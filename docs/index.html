@@ -1,10 +1,13 @@
+<!DOCTYPE html>
+<html lang="en-GB">
 <head>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" href="lib/prism.min.css" />
 	<link rel="stylesheet" href="index.css" />
 	<script src="lib/prism.min.js"></script>
+	<script src="lib/pb.compiled.min.json"></script>
 </head>
-
+<body>
 <div id="_controlSection">
 
 <div id="_optsSectionContainer" style="
@@ -125,7 +128,7 @@
 		<input id="_evtAllSwitch" type="checkbox" style="margin:0; margin-right: auto;" onchange="toggleAllEvents(this.checked)" />
 		<strong style="flex: 1 1 auto;">🔔Events</strong>
 	</div>
-	<div id="_evts" style="font-size: small;"></div>
+	<div id="_evts" style="font-size: x-small;"></div>
 </div>
 
 <div id="_msg" style="
@@ -141,12 +144,16 @@
 </div>
 
 <div id="_resSectionContainer">
-	<pre style="height: 100%; margin:0;"><code id="_res" class="language-json code"></code></pre>
+	<pre id="_resPre" style="margin: 0;"
+		data-prismjs-copy-timeout="500"
+		data-label="clrbtn"
+	><code id="_res" class="language-json code"></code></pre>
 </div>
-
-
-
-
+<template id="clrbtn"><button style="margin-right: 3px;" onclick="
+	_res.innerHTML='';
+	this.innerText='Cleared!';
+	setTimeout(()=>this.innerText='Clear',500);
+">Clear</button></template>
 
 
 <dialog id="_dialog">

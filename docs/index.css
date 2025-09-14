@@ -97,12 +97,14 @@ body {
 	width: 100%;
 }
 
-
+html,body {height: 100%}
 #_resSectionContainer {
 	float: right;
 	width: 46%;
 	height: 100%;
 }
+#_resSectionContainer>.code-toolbar, #_resPre, #_res {height: 100%;}
+
 
 @media screen and (min-width: 1600px) {
 	#_optsSectionContainer { width: 81%;}
