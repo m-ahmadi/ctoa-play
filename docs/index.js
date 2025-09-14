@@ -23,8 +23,6 @@ const pb = protobuf.Root.fromJSON(window.pbCompiledSrc).nested;
 window.pbCompiledSrc = undefined;
 
 const {reqs,ress,evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
-const reqs1Set = new Set(reqs1);
-const reqs2Set = new Set(reqs2);
 
 
 _evts.innerHTML = evts.map(i=>i.slice(0,-5))
@@ -86,22 +84,50 @@ function changeMessage(el) {
 		.flat()
 		.toSorted(sortAlphabet);
 	
-	_send.disabled = !r.length;
+	const hasSome = r.length;
+	_send.disabled = !hasSome;
+	if (!hasSome) _msg.innerHTML = '';
+	
 	_msgs.innerHTML = r.map(i=>`<option value="ProtoOA${i}Req">${i}</option>`).join('\n');
 	
 	if (el) updateAutoState(el);
 	if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
 }
 
+function changeTimestamps() {
+	const [frm, to] = [_tsFromVal, _tsToVal].map(i => +i.value);
+	if (to > frm) _tsFromVal.value = to+1;
+	
+	if (_msg.hasChildNodes()) {
+		const _targ1 = _msg.querySelector('input[name="fromTimestamp"]');
+		if (_targ1) _targ1.value = frm;
+		// inja
+		const _targ2 = _msg.querySelector('input[name="toTimestamp"]');
+		if (_targ2) _targ2.value = to;
+	}
+}
+
 
 
 function loadAccounts() {
-	if (!ws || ws.readyState !== WebSocket.OPEN) {
-		_conn.style.border = '2px dashed red';
+	// TODO: flasher chain, if:
+	// not connected, not app auth
+	if (!ws || ws.readyState !== WebSocket.OPEN ||
+		_appAuth.innerText === 'Auth App') {
+		
+		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
+		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
+		
 		return;
 	}
 	_conn.style.border = '';
+	_appAuth.style.border = '';
 	_accLoad.style.border = '';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
+	
+	_accLoad.disabled = true;
+	_accLoad.innerText = 'Load (...)';
 	
 	const clientMsgId = uid();
 	wsOnMsgHooks[clientMsgId] = res => {
@@ -112,16 +138,21 @@ function loadAccounts() {
 				`<option value="${id}">${id} - ${isLive?'Live':'Demo'} - ${broker}</option>`
 			);
 			_accLoad.disabled = true;
+			_accLoad.innerText = 'Load (✅)';
 			if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
 			if (_accAuthAuto.checked) _accAuth.dispatchEvent(new Event('click',{bubbles:true}));
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
-			_acc.innerHTML = '<option style="color:red;">❌Could not load accounts</option>';
-			_accLoadLabel.style.color = 'red';
-			_accLoadLabel.innerHTML = `<b>${errorCode}</b>: ${description}`;
+			_appAuth.style.border = '2px dashed red';
+			_accLoad.innerText = 'Load (❌)';
+			_accLoad.disabled = false;
+			_dialogMsg.style.color = 'red';
+			_dialogMsg.innerHTML = '❌Could not load accounts <br><br>'+
+				`<b>${errorCode}</b>: ${description}`;
+			_dialog.showModal();
 		} else {
-			_acc.innerHTML = '<option style="color:red;">🤷‍♂️Dont\' know what happened.</option>';
-			_accLoadLabel.innerText = JSON.stringify(payload);
+			_dialogMsg.innerText = '🤷‍♂️Dont\' know what happened. <br><br>' + JSON.stringify(payload);
+			_dialog.showModal();
 		}
 		delete wsOnMsgHooks[clientMsgId];
 		
@@ -133,35 +164,49 @@ function loadAccounts() {
 
 
 function authAccount() {
-	if (!ws || ws.readyState !== WebSocket.OPEN || !_acc.options.length) {
+	// TODO: flasher chain, if:
+	// not connected, not app auth, not acc load
+	if (!ws || ws.readyState !== WebSocket.OPEN ||
+		_appAuth.innerText === 'Auth App' ||
+		!_acc.options.length) {
+		
 		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
+		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
 		if (!_acc.options.length) _accLoad.style.border = '2px dashed red';
+		
 		return;
 	}
 	_conn.style.border = '';
+	_appAuth.style.border = '';
 	_accLoad.style.border = '';
-	_accAuthLabel.innerHTML = '';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
+	
+	_accAuth.innerText = 'Auth (...)';
+	_accAuth.disabled = true;
 	
 	const clientMsgId = uid();
 	wsOnMsgHooks[clientMsgId] = res => {
 		const {payloadType} = res;
 		if (payloadType === 2103) {
-			_accAuth.innerText = 'Auth Account (✅)';
-			_accAuth.disabled = true;
+			_accAuth.innerText = 'Auth (✅)';
 			if (_symLoadAuto.checked) _symLoad.dispatchEvent(new Event('click',{bubbles:true}));
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
 			if (errorCode === 'ALREADY_LOGGED_IN') {
-				_accAuth.innerText = 'Auth Account (✅)';
-				_accAuth.disabled = true;
+				_accAuth.innerText = 'Auth (✅)';
 			} else {
-				_accAuth.innerText = 'Auth Account (❌)';
-				_accAuthLabel.style.color = 'red';
-				_accAuthLabel.innerHTML = `<b>${errorCode}</b>: ${description}`;
+				_accAuth.innerText = 'Auth (❌)';
+				_dialogMsg.style.color = 'red';
+				_dialogMsg.innerHTML = `<b>${errorCode}</b>: ${description}`;
+				_dialog.showModal();
+				_accAuth.disabled = false;
 			}
 		} else {
-			_accAuth.innerText = 'Auth Account (🤷‍♂️)';
-			_accAuthLabel.innerText = JSON.stringify(payload);
+			_accAuth.innerText = 'Auth (🤷‍♂️)';
+			_dialogMsg.innerText = JSON.stringify(payload);
+			_dialog.showModal();
+			_accAuth.disabled = false;
 		}
 		delete wsOnMsgHooks[clientMsgId];
 	};
@@ -179,29 +224,55 @@ function changeAccount(newAccountId) {
 	}
 	if (_accAuth.disabled) {
 		_accAuth.disabled = false;
-		_accAuth.innerText = 'Auth Account (❌)';
+		_accAuth.innerText = 'Auth (❌)';
 	}
 }
 
 
 
 function loadSymbols() {
-	if (!ws || ws.readyState !== WebSocket.OPEN) {
-		_conn.style.border = '2px dashed red';
+	// TODO: flasher chain, if:
+	// not connected, not app auth, not acc load, not acc auth
+	if (!ws || ws.readyState !== WebSocket.OPEN ||
+		_appAuth.innerText === 'Auth App' ||
+		!_acc.options.length ||
+		_accAuth.innerText === 'Auth') {
+		
+		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
+		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
+		if (!_acc.options.length) _accLoad.style.border = '2px dashed red';
+		if (_accAuth.innerText === 'Auth') _accAuth.style.border = '2px dashed red';
+		
 		return;
 	}
 	_conn.style.border = '';
+	_appAuth.style.border = '';
+	_accLoad.style.border = '';
+	_accAuth.style.border = '';
+	
+	_symLoad.disabled = true;
+	_symLoad.innerText = 'Load (...)';
 	
 	const clientMsgId = uid();
 	wsOnMsgHooks[clientMsgId] = res => {
-		if (res.payloadType !== 2115) throw Error('fuk');
-		const syms = res.payload.symbol;
-		syms.sort(({symbolName:a},{symbolName:b})=>sortAlphabet(a,b));
-		_sym.innerHTML = syms.map(({symbolId, symbolName})=>
-			`<option value="${symbolId}">${symbolName}</option>`
-		);
-		_symLoad.innerText = 'Load (✅)';
-		_symLoad.disabled = true;
+		const {payloadType} = res;
+		if (payloadType === 2115) {
+			const syms = res.payload.symbol;
+			syms.sort(({symbolName:a},{symbolName:b})=>sortAlphabet(a,b));
+			_sym.innerHTML = syms.map(({symbolId, symbolName})=>
+				`<option value="${symbolId}">${symbolName}</option>`
+			);
+			_symLoad.innerText = 'Load (✅)';
+			_symLoad.disabled = true;
+		} else if (payloadType === 2142) {
+			const {errorCode, description} = res.payload;
+			_symLoad.innerText = 'Load (❌)';
+			_dialogMsg.style.color = 'red';
+			_dialogMsg.innerHTML = `<b>${errorCode}</b>: ${description}`;
+			_dialog.showModal();
+			_symLoad.disabled = false;
+		}
+		
 		delete wsOnMsgHooks[clientMsgId];
 	};
 	const req = {clientMsgId, payloadType: 2114, payload: {
@@ -225,6 +296,7 @@ function authApplication() {
 	}
 	_appAuth.disabled = true;
 	_appAuth.innerText = 'Auth App (...)';
+	_appAuth.style.border = '';
 	_conn.style.border = '';
 	_appAuthLabel.innerHTML = '';
 	
@@ -269,7 +341,7 @@ function establishConnection() {
 	
 	ws.onopen = function () {
 		_conn.innerText = 'Connect (✅)';
-		_accAuth.innerText = 'Auth Account';
+		_accAuth.innerText = 'Auth';
 		_accAuth.disabled = false;
 		if (_appAuthAuto.checked) authApplication();
 	};
@@ -399,6 +471,9 @@ function setupMsg(selected, r='', recurring) {
 				if (Object.keys(creds).includes(fieldkey)) {inpval = creds[fieldkey]; inptyp = 'password';}
 				if (fieldkey === 'ctidTraderAccountId' && _acc.options.length) inpval = +_acc.selectedOptions[0].value;
 				if (fieldkey === 'symbolId' && _sym.options.length) inpval = +_sym.selectedOptions[0].value;
+				if (fieldkey === 'fromTimestamp') {
+					// here
+				}
 				r += `<div><input type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
 			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${type}</div>`;

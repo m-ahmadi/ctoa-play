@@ -11,24 +11,20 @@
 	border: 1px solid black;">
 	
 	<button id="_cred" onclick="changeCredentials()">Credentials</button>
-	<button id="_credForget" onclick="forgetCredentials()">Forget</button>
-	<span class="steplbls">Step 1</span>
-	<hr>
+	<button id="_credForget" onclick="forgetCredentials()"><small><small>Forget</small></small></button>
+	&emsp;&emsp;
 	
 	<button id="_conn" onclick="establishConnection()">Connect</button>
-	<label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
-	<span id="_connLabel"></span>
-	<span class="steplbls">Step 2</span>
-	<hr>
+	<label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
+	&emsp;&emsp;
 	
 	<button id="_appAuth" onclick="authApplication()">Auth App</button>
-	<label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
 	<span id="_appAuthLabel"></span>
-	<span class="steplbls">Step 3</span>
 	<hr>
 	
 	<label style="float: left;">
-		<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" />heartbeat me up
+		<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />heartbeat me up
 	</label>
 	<div id="_connKeepFlashTarget1" style="float:left; margin-left:10px;" class="boxy">Client</div>
 	<div id="_connKeepFlashTarget2" style="float:left;" class="boxy">Server 
@@ -37,39 +33,88 @@
 	<hr style="clear:both;">
 	
 	Account: <select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
-	<button id="_accLoad" onclick="loadAccounts()">Load</button>
-	<label><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<button id="_accLoad" onclick="loadAccounts()" class="tiny">Load</button>
+	<label><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
 	<span id="_accLoadLabel"></span>
-	<span class="steplbls">Step 4</span>
-	<hr>
-	
-	<button id="_accAuth" onclick="authAccount()">Auth Account</button>
-	<label><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
-	<span id="_accAuthLabel"></span>
-	<span class="steplbls">Step 5</span>
+	&emsp;&emsp;
+	<button id="_accAuth" onclick="authAccount()" class="tiny">Auth</button>
+	<label><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
 	<hr>
 	
 	Symbol: <select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
-	<button id="_symLoad" onclick="loadSymbols()">Load</button>
-	<label><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<button id="_symLoad" onclick="loadSymbols()" class="tiny">Load</button>
+	<label><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
 	<span id="_symLoadLabel"></span>
-	<span class="steplbls">Step 6</span>
 	<hr>
 	
-	Message:
-	<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" />👉👈</label>
-	<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" />👉</label>
-	<select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
+	Message: <select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
 	<button id="_send" onclick="sendMessage()">Send</button>
-	<hr>
+	<div style="float:right; margin-right:50px;">
+		<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
+		<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
+	</div>
+	<hr style="clear:both">
+	
+	Timestamp: &emsp;&emsp; from:
+	<input id="_tsFromVal" type="number" min="1" value="1" class="tiny" style="width:40px;" oninput="changeTimestamps()" /><select id="_tsFromUnit" class="tiny">
+		<option value="sec">sec</option>
+		<option value="min">min</option>
+		<option value="day" selected>day</option>
+	</select>ago &emsp;&emsp;&emsp;&emsp; to:
+	<input id="_tsToVal" type="number" min="0" value="0" class="tiny" style="width:40px;" oninput="changeTimestamps()" /><select id="_tsToUnit" class="tiny">
+		<option value="sec">sec</option>
+		<option value="min">min</option>
+		<option value="day" selected>day</option>
+	</select>ago
+	
 	
 </div>
+
+
+<dialog id="_dialog">
+	<p id="_dialogMsg">Greetings, one and all!</p>
+	<form method="dialog">
+		<button>OK</button>
+	</form>
+</dialog>
+
+
+<dialog id="_dialog2" closedby="closerequest" onclose="console.log(this.returnValue || 0)" style="width:35%;">
+	<form method="dialog">
+		<div style="displaY:grid; grid-template-columns: 1fr 9fr; grid-row-gap: 25px;">
+			<div><label for="a"><b>ClientId:</b>&emsp;</label></div>
+			<div><input id="a" type="text" name="clientId"     class="chkbx3" required /></div>
+			
+			<div><label for="b"><b>ClientSecret:</b>&emsp;</label></div>
+			<div><input id="b" type="text" name="clientSecret" class="chkbx3" required /></div>
+			
+			<div><label for="c"><b>AccessToken:</b>&emsp;</label></div>
+			<div><input id="c" type="text" name="accessToken"  class="chkbx3" required /></div>
+			
+			<div><label for="d"><b>RefreshToken:</b>&emsp;</label></div>
+			<div><input id="d" type="text" name="refreshToken" class="chkbx3" required /></div>
+		</div>
+		
+		<menu style="text-align: center;">
+			<button type="button" onclick="this.value=754; _dialog2.close()">❌Cancel</button>
+			<button type="submit" onclick="this.value=JSON.stringify([a,b,c,d].map(i=>i.value));">✅Confirm</button>
+		</menu>
+	</form>
+</dialog>
+
+<button onclick="_dialog2.showModal()">d.showModal()</button>
+
+
 
 <div style="
 	float: left;
 	margin-left: 10px;
 	border: 1px solid teal;
-">🔔Event-like
+"><div style="
+		border-bottom: 1px solid black;
+		text-align: center;
+		padding: 2px 0 5px 0;
+	"><strong>🔔Events</strong></div>
 <table id="_evts"></table>
 </div>
 
