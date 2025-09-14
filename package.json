@@ -1,0 +1,13 @@
+{
+  "name": "ctoa-play",
+  "version": "0.0.1",
+  "scripts": {
+    "minify": "terser docs/index.js -o docs/index.min.js -c -m",
+    "compile-proto": "node scripts/compile-proto.js"
+  },
+  "author": "Mohammad Ahmadi",
+  "dependencies": {
+    "protobufjs": "^7.5.4",
+    "terser": "^5.44.0"
+  }
+}
