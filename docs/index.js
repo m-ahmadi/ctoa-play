@@ -4,7 +4,9 @@ let creds;
 let accessToken;
 let ws;
 let wsOnMsgHooks = {};
+let eventPayloadTypes;
 let heartbeatCountdownIntervalId;
+let tsLockDiff = 0;
 const uid = (i => () => 'cm_id_' + i++)(1);
 const sortAlphabet = (a, b) => a.localeCompare(b);
 
@@ -22,45 +24,9 @@ if (!conf.creds) {
 	);
 }
 
-function changeCredentials() {
-	_credsDialog.showModal();
-	_credsDialog.onclose = function () {
-		const res = _credsDialog.returnValue;
-		if (res) {
-			const [newCreds, shouldRemember] = JSON.parse(res);
-			const [clientId,clientSecret,at,refreshToken] = newCreds;
-			creds = {clientId,clientSecret,accessToken:at,refreshToken};
-			accessToken = at;
-			if (shouldRemember) {
-				conf.creds = creds;
-				localStorage.conf = JSON.stringify(conf);
-			}
-			_cred.innerText = 'Credentials (✅)';
-			_credForget.disabled = false;
-			_cred.style.border = '';
-		} else {
-			if (!conf.creds) _cred.innerText = 'Credentials (❌)';
-		}
-		_credsDialog.onclose = undefined;
-	};
-}
-function forgetCredentials() {
-	if (confirm('Are you sure?')) {
-		Object.keys(creds).map(k => 
-			_credsDialog.querySelector(`input[name=${k}]`).value = ''
-		);
-		delete conf.creds;
-		localStorage.conf = JSON.stringify(conf);
-		_cred.innerText = 'Credentials (❌)';
-		_credForget.disabled = true;
-	}
-}
-
-
-
 const pb = protobuf.Root.fromJSON(window.pbCompiledSrc).nested;
 window.pbCompiledSrc = undefined;
-const {reqs,ress,evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
+const {evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
 
 
 _evts.innerHTML = evts.map(i=>i.slice(0,-5))
@@ -88,17 +54,76 @@ document.addEventListener('DOMContentLoaded', function () {
 	_msgsFilter1Way.checked = conf.filterMessages1Way;
 	_credDialogRemember.checked = conf.credDialogRemember;
 	
+	_tsLock.checked = conf.tsLock;
+	emit(_tsLock, 'change');
+	_accLock.checked = conf.accLock;
+	_accLock.disabled = !_accLock.checked;
+	emit(_accLock, 'change');
+	_symLock.checked = conf.symLock;
+	_symLock.disabled = !_symLock.checked;
+	emit(_symLock, 'change');
+	
 	if (conf.autoConnect) {
-		_conn.dispatchEvent(new Event('click',{bubbles:true}));
+		emit(_conn, 'click');
 	}
 	if (_accLoadAuto.checked) _accLoad.disabled = true;
 	if (_accAuthAuto.checked) _accAuth.disabled = true;
 	if (_symLoadAuto.checked) _symLoad.disabled = true;
 	
+	if (_accLock.checked && conf.lockedAccount) {
+		_accLoad.disabled = true;
+		_accLoadAutoText.style.color = 'lightgrey';
+		_accLoadAuto.disabled = true;
+		const {lockedAccount: {name, value}} = conf;
+		_acc.innerHTML = `<option value="${value}">${name}</option>`;
+	}
+	
+	if (_symLock.checked && conf.lockedSymbol) {
+		_symLoad.disabled = true;
+		_symLoadAutoText.style.color = 'lightgrey';
+		_symLoadAuto.disabled = true;
+		const {lockedSymbol: {name, value}} = conf;
+		_sym.innerHTML = `<option value="${value}">${name}</option>`;
+	}
+	
 	changeMessage();
-	if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
+	if (_msgs.options.length) emit(_msgs, 'change');
 });
 
+function changeCredentials() {
+	_credsDialog.showModal();
+	_credsDialog.onclose = function () {
+		const res = _credsDialog.returnValue;
+		if (res) {
+			const [newCreds, shouldRemember] = JSON.parse(res);
+			const [clientId,clientSecret,at,refreshToken] = newCreds;
+			creds = {clientId,clientSecret,accessToken:at,refreshToken};
+			accessToken = at;
+			if (shouldRemember) {
+				conf.creds = creds;
+				localStorage.conf = JSON.stringify(conf);
+			}
+			_cred.innerText = 'Credentials (✅)';
+			_credForget.disabled = false;
+			_cred.style.border = '';
+		} else {
+			if (!conf.creds) _cred.innerText = 'Credentials (❌)';
+		}
+		_credsDialog.onclose = undefined;
+	};
+}
+
+function forgetCredentials() {
+	if (confirm('Are you sure?')) {
+		Object.keys(creds).map(k => 
+			_credsDialog.querySelector(`input[name=${k}]`).value = ''
+		);
+		delete conf.creds;
+		localStorage.conf = JSON.stringify(conf);
+		_cred.innerText = 'Credentials (❌)';
+		_credForget.disabled = true;
+	}
+}
 
 function updateAutoState(el) {
 	const {id} = el;
@@ -111,7 +136,53 @@ function updateAutoState(el) {
 	if (id === '_msgsFilter2Way') conf.filterMessages2Way = !!el.checked;
 	if (id === '_msgsFilter1Way') conf.filterMessages1Way = !!el.checked;
 	if (id === '_credDialogRemember') conf.credDialogRemember = !!el.checked;
+	if (id === '_tsLock') {
+		conf.tsLock = !!el.checked;
+		tsLockDiff = Math.abs((+_tsToVal.value) - (+_tsFromVal.value));
+		setLockIcon(_tsLockIcon, el.checked);
+	}
+	if (id === '_accLock') {
+		const {checked} = el;
+		conf.accLock = !!checked;
+		setLockIcon(_accLockIcon, checked);
+		if (checked) {
+			if (_acc.options.length) {
+				const acc = _acc.selectedOptions[0];
+				conf.lockedAccount = {name: acc.innerText, value: acc.value};
+				_accLoad.disabled = true;
+				_accLoadAuto.disabled = true;
+				_accLoadAutoText.style.color = 'lightgrey';
+			}
+		} else {
+			_accLoad.disabled = false;
+			_accLoadAuto.disabled = false;
+			_accLoadAutoText.style.color = '';
+		}
+	}
+	if (id === '_symLock') {
+		const {checked} = el;
+		conf.symLock = !!checked;
+		setLockIcon(_symLockIcon, checked);
+		if (checked) {
+			if (_sym.options.length) {
+				const sym = _sym.selectedOptions[0];
+				conf.lockedSymbol = {name: sym.innerText, value: sym.value};
+				_symLoad.disabled = true;
+				_symLoadAuto.disabled = true;
+				_symLoadAutoText.style.color = 'lightgrey';
+			}
+		} else {
+			_symLoad.disabled = false;
+			_symLoadAuto.disabled = false;
+			_symLoadAutoText.style.color = '';
+		}
+	}
 	localStorage.conf = JSON.stringify(conf);
+}
+
+function setLockIcon(container, bool) {
+	// container.innerText = ({'true':'🔒','false':'🔓'})[bool];
+	container.innerHTML = ({'true':icons.lock,'false':icons.unlock})[bool];
 }
 
 function changeMessage(el) {
@@ -131,36 +202,46 @@ function changeMessage(el) {
 	_msgs.innerHTML = r.map(i=>`<option value="ProtoOA${i}Req">${i}</option>`).join('\n');
 	
 	if (el) updateAutoState(el);
-	if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
+	if (_msgs.options.length) emit(_msgs, 'change');
 }
 
-function changeTimestamps() {
-	const [frm, to] = [_tsFromVal, _tsToVal].map(i => +i.value);
-	if (to > frm) _tsFromVal.value = to+1;
+function changeTimestamps(el) {
+	let [frm, to] = [_tsFromVal, _tsToVal].map(i => +i.value);
+	if (to > frm) {
+		if (el.id === '_tsFromVal') {
+			_tsToVal.value = --frm;
+		} else if (el.id === '_tsToVal') {
+			_tsFromVal.value = ++to;
+		}
+	}
+	
+	if (_tsLock.checked) {
+		if (el.id === '_tsFromVal') {
+			_tsToVal.value = frm - tsLockDiff;
+		} else if (el.id === '_tsToVal') {
+			_tsFromVal.value = tsLockDiff + to;
+		}
+	}
 	
 	if (_msg.hasChildNodes()) {
 		const _targ1 = _msg.querySelector('input[name="fromTimestamp"]');
-		if (_targ1) _targ1.value = getRelativeTimestamp([frm, _tsFromUnit.value]);
+		if (_targ1) _targ1.value = getRelativeTimestamp(frm, _tsFromUnit.selectedOptions[0].value);
 		
 		const _targ2 = _msg.querySelector('input[name="toTimestamp"]');
-		if (_targ2) _targ2.value = getRelativeTimestamp([to, _tsToUnit.value]);
+		if (_targ2) _targ2.value = getRelativeTimestamp(to, _tsToUnit.selectedOptions[0].value);
 	}
 }
 
-function getRelativeTimestamp([value, unit]) {
+function getRelativeTimestamp(value, unit) {
 	const d = new Date();
 	const m = ({sec:'Seconds',min:'Minutes',day:'Date'})[unit];
 	d['set'+m](d['get'+m]() - value);
 	return +d;
 }
 
-
-
-
 function loadSymbols() {
-	// TODO: flasher chain, if:
-	// not connected, not app auth, not acc load, not acc auth
-	if (!ws || ws.readyState !== WebSocket.OPEN ||
+	// highlight chain: !creds, !connected, !appauth, !accload, !accauth
+	if (!creds || !ws || ws.readyState !== WebSocket.OPEN ||
 		_appAuth.innerText === 'Auth App' ||
 		!_acc.options.length ||
 		_accAuth.innerText === 'Auth') {
@@ -192,6 +273,7 @@ function loadSymbols() {
 			);
 			_symLoad.innerText = 'Load (✅)';
 			_symLoad.disabled = true;
+			_symLock.disabled = false;
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
 			_symLoad.innerText = 'Load (❌)';
@@ -215,13 +297,15 @@ function changeSymbol(newSymbolId) {
 		const _targ = _msg.querySelector('input[name="symbolId"]');
 		if (_targ) _targ.value = newSymbolId;
 	}
+	if (_symLock) {
+		const sym = _sym.selectedOptions[0];
+		conf.lockedSymbol = {name: sym.innerText, value: sym.value};
+		localStorage.conf = JSON.stringify(conf);
+	}
 }
 
-
-
 function authAccount() {
-	// TODO: flasher chain, if:
-	// not connected, not app auth, not acc load
+	// highlight chain: !creds, !connected, !appauth, !accload
 	if (!creds || !ws || ws.readyState !== WebSocket.OPEN ||
 		_appAuth.innerText === 'Auth App' ||
 		!_acc.options.length) {
@@ -237,18 +321,19 @@ function authAccount() {
 	_conn.style.border = '';
 	_appAuth.style.border = '';
 	_accLoad.style.border = '';
-	_dialogMsg.innerHTML = '';
-	_dialogMsg.style.color = '';
 	
 	_accAuth.innerText = 'Auth (...)';
 	_accAuth.disabled = true;
+	
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
 	
 	const clientMsgId = uid();
 	wsOnMsgHooks[clientMsgId] = res => {
 		const {payloadType} = res;
 		if (payloadType === 2103) {
 			_accAuth.innerText = 'Auth (✅)';
-			if (_symLoadAuto.checked) _symLoad.dispatchEvent(new Event('click',{bubbles:true}));
+			if (!_symLock.checked && _symLoadAuto.checked) emit(_symLoad, 'click');
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
 			if (errorCode === 'ALREADY_LOGGED_IN') {
@@ -275,7 +360,6 @@ function authAccount() {
 	ws.sendj(req);
 }
 
-
 function changeAccount(newAccountId) {
 	if (_msg.hasChildNodes()) {
 		const _targ = _msg.querySelector('input[name="ctidTraderAccountId"]');
@@ -285,12 +369,15 @@ function changeAccount(newAccountId) {
 		_accAuth.disabled = false;
 		_accAuth.innerText = 'Auth (❌)';
 	}
+	if (_accLock) {
+		const acc = _acc.selectedOptions[0];
+		conf.lockedAccount = {name: acc.innerText, value: acc.value};
+		localStorage.conf = JSON.stringify(conf);
+	}
 }
 
-
 function loadAccounts() {
-	// TODO: flasher chain, if:
-	// not connected, not app auth
+	// highlight chain: !creds, !connected, !appauth
 	if (!creds || !ws || ws.readyState !== WebSocket.OPEN ||
 		_appAuth.innerText === 'Auth App') {
 		
@@ -304,11 +391,11 @@ function loadAccounts() {
 	_conn.style.border = '';
 	_appAuth.style.border = '';
 	_accLoad.style.border = '';
-	_dialogMsg.innerHTML = '';
-	_dialogMsg.style.color = '';
 	
 	_accLoad.disabled = true;
 	_accLoad.innerText = 'Load (...)';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
 	
 	const clientMsgId = uid();
 	wsOnMsgHooks[clientMsgId] = res => {
@@ -320,8 +407,9 @@ function loadAccounts() {
 			);
 			_accLoad.disabled = true;
 			_accLoad.innerText = 'Load (✅)';
-			if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
-			if (_accAuthAuto.checked) _accAuth.dispatchEvent(new Event('click',{bubbles:true}));
+			_accLock.disabled = false;
+			if (_msgs.options.length) emit(_msgs, 'change');
+			if (_accAuthAuto.checked) emit(_accAuth, 'click');
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
 			_appAuth.style.border = '2px dashed red';
@@ -344,6 +432,7 @@ function loadAccounts() {
 }
 
 function authApplication() {
+	// highlight chain: !creds, !connected
 	if (!creds || !ws || ws.readyState !== WebSocket.OPEN) {
 		if (!creds) _cred.style.border = '2px dashed red';
 		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
@@ -363,7 +452,8 @@ function authApplication() {
 		const {payloadType} = res;
 		if (payloadType === 2101) {
 			_appAuth.innerText = 'Auth App (✅)';
-			if (_accLoadAuto.checked) _accLoad.dispatchEvent(new Event('click',{bubbles:true}));
+			if (!_accLock.checked && _accLoadAuto.checked) emit(_accLoad, 'click');
+			if (_accLock.checked && _accAuthAuto.checked) emit(_accAuth, 'click');
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
 			_appAuth.innerText = 'Auth App (❌)';
@@ -389,13 +479,12 @@ function authApplication() {
 	ws.sendj(req);
 }
 
-
 function establishConnection() {
 	ws = new WebSocket('wss://live.ctraderapi.com:5036');
 	ws.__proto__.sendj = function (o) {this.send(JSON.stringify(o));}
+	_conn.style.border = '';
 	_conn.disabled = true;
 	_conn.innerText = 'Connect (...)';
-	_conn.style.border = '';
 	_res.value = '';
 	_res.style.color = '';
 	
@@ -412,10 +501,12 @@ function establishConnection() {
 		
 		if (eventPayloadTypes.has(payloadType)) {
 			const el = eventElems[payloadType];
-			flashElem(el, 'khaki');
-			const jsonstr = JSON.stringify(msg, null, 2);
+			flashElem(el, 'khaki', 0.1, 0.1);
+			/* const jsonstr = JSON.stringify(msg, null, 2);
 			_evtRes.innerHTML = Prism.highlight(jsonstr, Prism.languages.javascript, 'javascript');
-			return;
+			return; */
+			
+			// TODO: event checkboxes
 		}
 		
 		if (payloadType === 51) {
@@ -447,9 +538,46 @@ function establishConnection() {
 	};
 }
 
-
-
-
+function constructPayload(fields, r={}, recurring) {
+	for (const field of fields) {
+		const [fieldName, formElem, ptype] = field;
+		const isFieldDeep = ptype.startsWith('ProtoOA') && pb[ptype].fields ? true : false;
+		
+		if (isFieldDeep) {
+			r[fieldName] = {};
+			const subfieldNames = new Set(Object.keys(pb[ptype].fields));
+			const subfields = fields.filter(([fieldName]) => subfieldNames.has(fieldName));
+			constructPayload(subfields, r[fieldName], true);
+		} else {
+			const {type} = formElem;
+			let val;
+			// TODO: if text|pass|num input value is non-exist, then don't add field
+			if (['text','password','number'].includes(type) && formElem.value) {
+				val = formElem.value;
+				if (type === 'number') val = +val;
+			} else {
+				if (type === 'checkbox') {
+					val = formElem.checked;
+				} else if (type === 'select-one') {
+					val = +formElem.selectedOptions[0].value;
+				}
+			}
+			if (val !== undefined) r[formElem.name] = val;
+			/* if (type === 'text' || type === 'password') {
+				val = formElem.value;
+			} else if (type === 'number') {
+				val = +formElem.value;
+			} else if (type === 'checkbox') {
+				val = formElem.checked;
+			} else if (type === 'select-one') {
+				val = +formElem.selectedOptions[0].value;
+			}
+			r[formElem.name] = val; */
+		}
+	}
+	
+	if (!recurring) return r;
+}
 function sendMessage() {
 	if (!ws || ws.readyState !== WebSocket.OPEN) {
 		_conn.style.border = '2px dashed red';
@@ -461,7 +589,15 @@ function sendMessage() {
 	_res.innerText = '';
 	_res.style.color = '';
 	
-	const fields = [..._msg.querySelectorAll('input'), ..._msg.querySelectorAll('select')];
+	
+	var fieldNames = [..._msg.querySelectorAll('div[data-field]')].map(i=>i.innerText.slice(0,-1));
+	var formElems = [..._msg.querySelectorAll('div[data-field]+div')].map(i=>i.querySelector(':scope > input,select'));
+	var ptypes = [..._msg.querySelectorAll('div[data-field]+div+div')].map(i=>i.innerText);
+	var fields = fieldNames.map((v,i) => [v, formElems[i], ptypes[i]]);
+	
+	const payload = constructPayload(fields);
+	
+	/* const fields = [..._msg.querySelectorAll('input'), ..._msg.querySelectorAll('select')];
 	
 	// TODO: handle deep field
 	const rdy = fields.map(el => {
@@ -481,7 +617,8 @@ function sendMessage() {
 		return [key, val];
 	});
 	
-	const payload = Object.fromEntries(rdy);
+	const payload = Object.fromEntries(rdy); */
+	
 	const payloadType = pb[_msgs.selectedOptions[0].value].fields.payloadType.defaultValue;
 	const msg = {payloadType, payload};
 	
@@ -505,7 +642,7 @@ function setupMsg(selected, r='', recurring) {
 		const {type, required} = field;
 		
 		const isFieldEnum = type.startsWith('ProtoOA') && !pb[type].fields;
-		const isFieldDeep = type.startsWith('ProtoOA') && pb[type].fields;
+		const isFieldDeep = type.startsWith('ProtoOA') && pb[type].fields ? true : false;
 		
 		let fieldEnum, fieldEnumFmt;
 		if (isFieldEnum) {
@@ -521,7 +658,7 @@ function setupMsg(selected, r='', recurring) {
 			r += `<div></div>`;
 			r += `\n`;
 		} else {
-			r += `<div>${fieldkey}:</div>`;
+			r += `<div data-field>${fieldkey}:</div>`;
 			if (isFieldEnum) {
 				r += `<div><select name="${fieldkey}">`;
 				r += fieldEnum.map(([v,k])=>`<option value="${v}">${k}</option>`).join('\n');
@@ -536,9 +673,8 @@ function setupMsg(selected, r='', recurring) {
 				if (creds && Object.keys(creds).includes(fieldkey)) {inpval = creds[fieldkey]; inptyp = 'password';}
 				if (fieldkey === 'ctidTraderAccountId' && _acc.options.length) inpval = +_acc.selectedOptions[0].value;
 				if (fieldkey === 'symbolId' && _sym.options.length) inpval = +_sym.selectedOptions[0].value;
-				if (fieldkey === 'fromTimestamp' || fieldkey === 'toTimestamp') {
-					// inja
-				}
+				if (fieldkey === 'fromTimestamp') inpval = getRelativeTimestamp(+_tsFromVal.value, _tsFromUnit.selectedOptions[0].value);
+				if (fieldkey === 'toTimestamp') inpval = getRelativeTimestamp(+_tsToVal.value, _tsToUnit.selectedOptions[0].value);
 				r += `<div><input type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
 			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${type}</div>`;
@@ -559,11 +695,8 @@ function setupMsg(selected, r='', recurring) {
 	}
 }
 
-
-
-
-
-
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// util
 function categorizeMessages(allMessageFullNames) {
 	const prefix = 'ProtoOA';
 	const poas = allMessageFullNames.filter(i=>i.startsWith(prefix)).map(i=>i.split(prefix)[1]);
@@ -601,32 +734,45 @@ function flashElem(el, bgcolor='khaki', fadeoutAfter=0.15, fadeoutDuration=0.5) 
 	el.style.transition = `background ${fadeoutDuration}s`;
 	setTimeout(()=> el.style.background = '', fadeoutAfter*1000);
 }
-/*
 
-background: yellow;
-background: gold;
-background: khaki;
-background: navajowhite;
-background: palegoldenrod;
-background: moccasin;
-background: wheat;
-background: tan;
-background: darkkhaki;
-background: lemonchiffon;
-background: lightgoldenrodyellow;
-background: lightyellow;
-background: papayawhip;
-background: peachpuff;
-background: sandybrown;
+function spotlight(el, bool) {
+	el.style.border = bool ? '2px dashed red' : '';
+}
 
-background: lightblue;
-background: lightskyblue;
-background: mediumaquamarine;
-background: mediumturquoise;
+function emit(el, evt) {
+	el.dispatchEvent(new Event(evt, {bubbles: true}));
+}
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// vijual
 
+const lockIconStyle = ''+
+`width: 15px;
+height: 15px;
+stroke: currentColor;
+fill: none;
+stroke-width: 2;
+vertical-align: sub;`;
 
-el.style.transition = '';
-el.style.background = 'khaki';
-el.style.transition = 'background 0.5s';
-setTimeout(()=> el.style.background = '', 150);
-*/
+const icons = {};
+icons.lock = ''+
+`<svg viewBox="0 0 24 24" style="${lockIconStyle}">
+  <path d="M8 11V7a4 4 0 118 0v4"></path>
+  <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+</svg>`;
+icons.unlock = ''+
+`<svg class="icon" viewBox="0 0 24 24" style="${lockIconStyle}">
+  <path d="M12 11V7a4 4 0 118 0"></path>
+  <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+</svg>`;
+
+_acc.title = 'Account used for "ctidTraderAccount" field of a message. (if message has such field)';
+_accLockContainer.title = 'If locked, at next page refresh, selected account is used and account loading is disabled.';
+_accAuthAutoContainer.title = 'Automatic account auth. (effective at next page refresh)';
+_sym.title = 'Symbol used for "symbolId" field of a message. (if message has such field)';
+_symLockContainer.title = 'If locked, at next page refresh, selected symbol is used and symbol loading is disabled.';
+_accLoadAutoText.title = 'Automatic account loading. (effective at next page refresh)';
+
+_tsSectionLabel.title = 'Timestamps used for "fromTimestamp" and "toTimestamp" fields of a message. (if message has such fields)';
+_tsFromContainer.title = 'Timestamp for "fromTimestamp" field, specified in relative manner. (0 means now)';
+_tsToContainer.title = 'Timestamp for "toTimestamp" field, specified in relative manner. (0 means now)';
+_tsLockContainer.title = 'Lock distance between "from" and "to" values.';

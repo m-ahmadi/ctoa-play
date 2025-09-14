@@ -10,65 +10,139 @@
 	width: 40%;
 	border: 1px solid black;">
 	
-	<button id="_cred" onclick="changeCredentials()">Credentials</button>
-	<button id="_credForget" onclick="forgetCredentials()"><small><small>Forget</small></small></button>
-	&emsp;&emsp;&emsp;&emsp;
-	
-	<button id="_conn" onclick="establishConnection()">Connect</button>
-	<label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	&emsp;&emsp;&emsp;&emsp;
-	
-	<button id="_appAuth" onclick="authApplication()">Auth App</button>
-	<label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	<hr>
-	
-	<label style="float: left;">
-		<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />heartbeat me up
-	</label>
-	<div id="_connKeepFlashTarget1" style="float:left; margin-left:10px;" class="boxy">Client</div>
-	<div id="_connKeepFlashTarget2" style="float:left;" class="boxy">Server 
-		<small><small><span id="_hbtimer"></span></small></small>
+	<div class="optg">
+		<button id="_cred" onclick="changeCredentials()">Credentials</button><button id="_credForget" onclick="forgetCredentials()" class="tinybtn">Forget</button>
+		&emsp;&emsp;
+		
+		<button id="_conn" onclick="establishConnection()">Connect</button><label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+		&emsp;&emsp;
+		
+		<button id="_appAuth" onclick="authApplication()">Auth App</button><label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
 	</div>
-	<hr style="clear:both;">
 	
-	Account: <select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
-	<button id="_accLoad" onclick="loadAccounts()" class="tiny">Load<label><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label></button>
-	
-	&emsp;&emsp;
-	<button id="_accAuth" onclick="authAccount()" class="tiny">Auth</button>
-	<label><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	<hr>
-	
-	Symbol: <select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
-	<button id="_symLoad" onclick="loadSymbols()" class="tiny">Load</button>
-	<label><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	<hr>
-	
-	Timestamp: &emsp;&emsp; from:
-	<input id="_tsFromVal" type="number" min="1" value="1" class="tiny" style="width:40px;" oninput="changeTimestamps()" /><select id="_tsFromUnit" class="tiny">
-		<option value="sec">sec</option>
-		<option value="min">min</option>
-		<option value="day" selected>day</option>
-	</select>ago &emsp;&emsp;&emsp;&emsp; to:
-	<input id="_tsToVal" type="number" min="0" value="0" class="tiny" style="width:40px;" oninput="changeTimestamps()" /><select id="_tsToUnit" class="tiny">
-		<option value="sec">sec</option>
-		<option value="min">min</option>
-		<option value="day" selected>day</option>
-	</select>ago
-	<hr>
-	
-	Message: <select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
-	<button id="_send" onclick="sendMessage()">Send</button>
-	<div style="float:right; margin-right:50px;">
-		<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
-		<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
+	<div class="optg">
+		<label style="float: left;">
+			<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />heartbeat me up&emsp;
+		</label>
+		<div style="display:grid; grid-template-columns: auto auto;">
+			<div id="_connKeepFlashTarget1" class="boxy">Client</div>
+			<div id="_connKeepFlashTarget2" class="boxy">Server 
+				<small><small><span id="_hbtimer"></span></small></small>
+			</div>
+		</div>
 	</div>
-	<hr style="clear:both">
 	
+	<div class="optg">
+		Account: <select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
+		<span id="_accLockContainer">
+			<input id="_accLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_accLockIcon" for="_accLock">
+				<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
+					<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+				</svg>
+			</label>
+		</span>
+		<button id="_accLoad" onclick="loadAccounts()" class="tinybtn" title="Load all accounts.">Load</button><label id="_accLoadAutoText"><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+		<button id="_accAuth" onclick="authAccount()" class="tinybtn">Auth</button><label id="_accAuthAutoContainer"><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+	</div>
 	
+	<div class="optg">
+		Symbol: <select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
+		<span id="_symLockContainer">
+			<input id="_symLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_symLockIcon" for="_symLock">
+				<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
+					<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+				</svg>
+			</label>
+		</span>
+		<button id="_symLoad" onclick="loadSymbols()" class="tinybtn" title="Load all symbols.">Load</button><label id="_symLoadAutoText"><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+	</div>
 	
+	<div class="optg">
+		<span id="_tsSectionLabel">Timestamp: </span>&emsp;&emsp;<span id="_tsFromContainer"> from:
+		<input id="_tsFromVal" type="number" min="1" value="1" class="tiny" style="width:40px;" oninput="changeTimestamps(this)" /><select id="_tsFromUnit" class="tiny">
+			<option value="sec">sec</option>
+			<option value="min">min</option>
+			<option value="day" selected>day</option>
+		</select>ago</span>
+		&emsp;&emsp;
+		<span id="_tsLockContainer">
+			<input id="_tsLock" type="checkbox" class="chkbx2" onchange="updateAutoState(this)" /><label id="_tsLockIcon" for="_tsLock">
+				<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
+					<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+				</svg>
+			</label>
+		</span>
+		&emsp;&emsp; <span id="_tsToContainer">to:
+		<input id="_tsToVal" type="number" min="0" value="0" class="tiny" style="width:40px;" oninput="changeTimestamps(this)" /><select id="_tsToUnit" class="tiny">
+			<option value="sec">sec</option>
+			<option value="min">min</option>
+			<option value="day" selected>day</option>
+		</select>ago</span>
+	</div>
+	
+	<div style="background:khaki;" class="optg">
+		<b>Message: </b><select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
+		<button id="_send" onclick="sendMessage()">Send</button>
+		<div style="float:right; margin-right:50px;">
+			<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
+			<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
+		</div>
+		<span style="clear:both"></span>
+	</div>
 	
 </div>
+
+
+<div style="
+	float: left;
+	margin-left: 10px;
+	border: 1px solid teal;
+">
+	<div style="
+		background: #e5e2a6;
+		border-bottom: 1px solid black;
+		text-align: center;
+		padding-bottom: 3px;
+	"><strong>🔔Events</strong></div>
+	<table id="_evts" style="
+		border-collapse: collapse;
+		font-size: small;
+	"></table>
+</div>
+
+
+<!-- <div style="
+	border: 1px solid deeppink;
+	float: right;
+	width: 45%;
+	height: 250px;
+"><pre style="
+	height: 100%;
+">Events:<code id="_evtRes" class="language-json code"></code></pre></div>
+ -->
+
+<div style="
+	/* border: 1px solid magenta; */
+	float: right;
+	width: 45%;
+"><pre style="height: 100%; margin:0;">
+<code id="_res" class="language-json code"></code></pre></div>
+
+
+<div id="_msg" style="
+	/* clear: both; */
+	float: left;
+	width: 54%;
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+	
+	border: 1px solid lightgrey;
+	border-radius: 5px;
+	margin-top: 5px;
+	padding: 4px;
+"></div>
+
+
 
 
 <dialog id="_dialog">
@@ -83,16 +157,16 @@
 	<form method="dialog">
 		<div style="displaY:grid; grid-template-columns: 1fr 9fr; grid-row-gap: 25px;">
 			<div><label for="a"><b>ClientId:</b>&emsp;</label></div>
-			<div><input id="a" type="text" name="clientId"     class="chkbx3" required /></div>
+			<div><input id="a" type="text" name="clientId"     class="chkbx4" required /></div>
 			
 			<div><label for="b"><b>ClientSecret:</b>&emsp;</label></div>
-			<div><input id="b" type="text" name="clientSecret" class="chkbx3" required /></div>
+			<div><input id="b" type="text" name="clientSecret" class="chkbx4" required /></div>
 			
 			<div><label for="c"><b>AccessToken:</b>&emsp;</label></div>
-			<div><input id="c" type="text" name="accessToken"  class="chkbx3" required /></div>
+			<div><input id="c" type="text" name="accessToken"  class="chkbx4" required /></div>
 			
 			<div><label for="d"><b>RefreshToken:</b>&emsp;</label></div>
-			<div><input id="d" type="text" name="refreshToken" class="chkbx3" required /></div>
+			<div><input id="d" type="text" name="refreshToken" class="chkbx4" required /></div>
 		</div>
 		
 		<menu>
@@ -109,43 +183,6 @@
 
 
 
-<div style="
-	float: left;
-	margin-left: 10px;
-	border: 1px solid teal;
-"><div style="
-		border-bottom: 1px solid black;
-		text-align: center;
-		padding: 2px 0 5px 0;
-	"><strong>🔔Events</strong></div>
-<table id="_evts"></table>
-</div>
-
-<div style="
-	border: 1px solid deeppink;
-	float: right;
-	width: 45%;
-	height: 250px;
-"><pre style="
-	height: 100%;
-">Events:<code id="_evtRes" class="language-json code"></code></pre></div>
-
-
-<div id="_msg" style="
-	clear: both;
-	float: left;
-	width: 54%;
-	border: 1px solid blue;
-	display: grid;
-	grid-template-columns: auto auto auto auto;
-"></div>
-
-<div style="
-	border: 1px solid magenta;
-	float: right;
-	width: 45%;
-"><pre style="height: 100%;">
-<code id="_res" class="language-json code"></code></pre></div>
 
 <script src="../node_modules/protobufjs/dist/light/protobuf.min.js"></script>
 <script src="lib/pb.compiled.min.js"></script>
