@@ -1,0 +1,111 @@
+<head>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="lib/prism.min.css" />
+	<link rel="stylesheet" href="index.css" />
+	<script src="lib/prism.min.js"></script>
+</head>
+
+<div style="
+	float: left;
+	width: 40%;
+	border: 1px solid black;">
+	
+	<button id="_cred" onclick="changeCredentials()">Credentials</button>
+	<button id="_credForget" onclick="forgetCredentials()">Forget</button>
+	<span class="steplbls">Step 1</span>
+	<hr>
+	
+	<button id="_conn" onclick="establishConnection()">Connect</button>
+	<label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<span id="_connLabel"></span>
+	<span class="steplbls">Step 2</span>
+	<hr>
+	
+	<button id="_appAuth" onclick="authApplication()">Auth App</button>
+	<label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<span id="_appAuthLabel"></span>
+	<span class="steplbls">Step 3</span>
+	<hr>
+	
+	<label style="float: left;">
+		<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" />heartbeat me up
+	</label>
+	<div id="_connKeepFlashTarget1" style="float:left; margin-left:10px;" class="boxy">Client</div>
+	<div id="_connKeepFlashTarget2" style="float:left;" class="boxy">Server 
+		<small><small><span id="_hbtimer"></span></small></small>
+	</div>
+	<hr style="clear:both;">
+	
+	Account: <select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
+	<button id="_accLoad" onclick="loadAccounts()">Load</button>
+	<label><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<span id="_accLoadLabel"></span>
+	<span class="steplbls">Step 4</span>
+	<hr>
+	
+	<button id="_accAuth" onclick="authAccount()">Auth Account</button>
+	<label><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<span id="_accAuthLabel"></span>
+	<span class="steplbls">Step 5</span>
+	<hr>
+	
+	Symbol: <select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
+	<button id="_symLoad" onclick="loadSymbols()">Load</button>
+	<label><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" />auto</label>
+	<span id="_symLoadLabel"></span>
+	<span class="steplbls">Step 6</span>
+	<hr>
+	
+	Message:
+	<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" />👉👈</label>
+	<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" />👉</label>
+	<select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
+	<button id="_send" onclick="sendMessage()">Send</button>
+	<hr>
+	
+</div>
+
+<div style="
+	float: left;
+	margin-left: 10px;
+	border: 1px solid teal;
+">🔔Event-like
+<table id="_evts"></table>
+</div>
+
+<div style="
+	border: 1px solid deeppink;
+	float: right;
+	width: 45%;
+	height: 250px;
+"><pre style="
+	height: 100%;
+">Events:<code id="_res2" class="language-json code"></code></pre></div>
+
+
+<div id="_msg" style="
+	clear: both;
+	float: left;
+	width: 54%;
+	border: 1px solid blue;
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+"></div>
+
+<!-- <textarea id="_res" cols="50" rows="30" class="language-js" style="
+	resize:none;
+	border: 1px solid red;
+	float:right;
+	width:39%;
+" readonly></textarea> -->
+
+<div style="
+	border: 1px solid magenta;
+	float: right;
+	width: 45%;
+"><pre style="height: 100%;">
+<code id="_res" class="language-json code"></code></pre></div>
+
+<script src="../node_modules/protobufjs/dist/light/protobuf.min.js"></script>
+<script src="lib/pb.compiled.min.js"></script>
+<script src="index.js"></script>
