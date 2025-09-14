@@ -28,19 +28,12 @@ const pb = protobuf.Root.fromJSON(window.pbCompiledSrc).nested;
 window.pbCompiledSrc = undefined;
 const {evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
 
-// _evts.innerHTML = evts.map(i=>i.slice(0,-5))
-// 	.map(i => `<tr><td><div class="flasher">${i}</div></td></tr>`).join('\n');
-
 _evts.innerHTML = evts.map(i=>i.slice(0,-5)).map(i => ''+
 `<div class="flasher">
 	<label style="display:block">
 		<input type="checkbox" name="${i}" class="flasher-input" />${i}</label>
 </div>`).join('\n');
 
-// _evts.innerHTML = '<select size="13" style="font-size: smaller;" multiple>' + evts.map(i=>i.slice(0,-5))
-// 	.map(i => `<option value="${i}" class="flasher" selected>${i}</option>`).join('\n')
-// 	+'</select>';
-	
 eventElems = Object.fromEntries([..._evts.querySelectorAll('.flasher')].map(el => [
 	pb['ProtoOA'+el.innerText+'Event'].fields.payloadType.defaultValue, el
 ]));
@@ -216,7 +209,6 @@ function updateAutoState(el) {
 
 
 function setLockIcon(container, bool) {
-	// container.innerText = ({'true':'🔒','false':'🔓'})[bool];
 	container.innerHTML = ({'true':icons.lock,'false':icons.unlock})[bool];
 }
 
@@ -537,11 +529,7 @@ function establishConnection() {
 		if (eventPayloadTypes.has(payloadType)) {
 			const el = eventElems[payloadType];
 			flashElem(el, 'khaki', 0.1, 0.1);
-			/* const jsonstr = JSON.stringify(msg, null, 2);
-			_evtRes.innerHTML = Prism.highlight(jsonstr, Prism.languages.javascript, 'javascript');
-			return; */
 			
-			// ✔TODO: event checkboxes
 			if (!el.querySelector('input').checked) {
 				return;
 			}
@@ -589,7 +577,6 @@ function constructPayload(fields, r={}, recurring) {
 		} else {
 			const {type} = formElem;
 			let val;
-			// ✔TODO: if text|pass|num input value is non-exist, then don't add field
 			if (['text','password','number'].includes(type) && formElem.value) {
 				val = formElem.value;
 				if (type === 'number') val = +val;
@@ -601,16 +588,6 @@ function constructPayload(fields, r={}, recurring) {
 				}
 			}
 			if (val !== undefined) r[formElem.name] = val;
-			/* if (type === 'text' || type === 'password') {
-				val = formElem.value;
-			} else if (type === 'number') {
-				val = +formElem.value;
-			} else if (type === 'checkbox') {
-				val = formElem.checked;
-			} else if (type === 'select-one') {
-				val = +formElem.selectedOptions[0].value;
-			}
-			r[formElem.name] = val; */
 		}
 	}
 	
@@ -634,29 +611,6 @@ function sendMessage() {
 	var fields = fieldNames.map((v,i) => [v, formElems[i], ptypes[i]]);
 	
 	const payload = constructPayload(fields);
-	
-	/* const fields = [..._msg.querySelectorAll('input'), ..._msg.querySelectorAll('select')];
-	
-	// ✔TODO: handle deep field
-	const rdy = fields.map(el => {
-		const {type, name: key} = el;
-		let val;
-		
-		if (type === 'text' || type === 'password') {
-			val = el.value;
-		} else if (type === 'number') {
-			val = +el.value;
-		} else if (type === 'checkbox') {
-			val = el.checked;
-		} else if (type === 'select-one') {
-			val = +el.selectedOptions[0].value;
-		}
-		
-		return [key, val];
-	});
-	
-	const payload = Object.fromEntries(rdy); */
-	
 	const payloadType = pb[_msgs.selectedOptions[0].value].fields.payloadType.defaultValue;
 	const msg = {payloadType, payload};
 	
@@ -688,7 +642,6 @@ function setupMsg(selected, r='', recurring) {
 			fieldEnum = Object.keys(o).map(k => [o[k], k]);
 			fieldEnumFmt = fieldEnum.map(i=>i.join('=')).join(', ');
 		}
-		// ✔TODO: make <label for> tags
 		if (fieldkey === 'payloadType') {
 			r += `<div><u>${fieldkey}</u>:</div>`;
 			r += `<div><code class="cuscode">${field.defaultValue}</code></div>`;
