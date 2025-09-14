@@ -2,6 +2,19 @@ body {
 	font-family: monospace;
 }
 
+.chkbx {
+	margin-left: 0;
+	vertical-align: middle;
+}
+.chkbx2 {
+	margin: 0;
+	vertical-align: middle;
+}
+
+.tiny {
+	font-size: x-small;
+}
+
 .cint {color: blue;}
 .cdbl {color: blue;}
 .cbool {color: magenta;}
@@ -34,4 +47,9 @@ tr:last-child {border-bottom: none;}
 	text-align: center;
 	padding-top: 2px;
 	margin-bottom: 7px;
+}
+
+.chkbx3 {
+	width: 100%;
+	/* font-size: x-small; */
 }

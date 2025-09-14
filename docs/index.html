@@ -12,15 +12,14 @@
 	
 	<button id="_cred" onclick="changeCredentials()">Credentials</button>
 	<button id="_credForget" onclick="forgetCredentials()"><small><small>Forget</small></small></button>
-	&emsp;&emsp;
+	&emsp;&emsp;&emsp;&emsp;
 	
 	<button id="_conn" onclick="establishConnection()">Connect</button>
 	<label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	&emsp;&emsp;
+	&emsp;&emsp;&emsp;&emsp;
 	
 	<button id="_appAuth" onclick="authApplication()">Auth App</button>
 	<label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	<span id="_appAuthLabel"></span>
 	<hr>
 	
 	<label style="float: left;">
@@ -33,9 +32,8 @@
 	<hr style="clear:both;">
 	
 	Account: <select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
-	<button id="_accLoad" onclick="loadAccounts()" class="tiny">Load</button>
-	<label><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	<span id="_accLoadLabel"></span>
+	<button id="_accLoad" onclick="loadAccounts()" class="tiny">Load<label><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label></button>
+	
 	&emsp;&emsp;
 	<button id="_accAuth" onclick="authAccount()" class="tiny">Auth</button>
 	<label><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
@@ -44,16 +42,7 @@
 	Symbol: <select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
 	<button id="_symLoad" onclick="loadSymbols()" class="tiny">Load</button>
 	<label><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />auto</label>
-	<span id="_symLoadLabel"></span>
 	<hr>
-	
-	Message: <select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
-	<button id="_send" onclick="sendMessage()">Send</button>
-	<div style="float:right; margin-right:50px;">
-		<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
-		<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
-	</div>
-	<hr style="clear:both">
 	
 	Timestamp: &emsp;&emsp; from:
 	<input id="_tsFromVal" type="number" min="1" value="1" class="tiny" style="width:40px;" oninput="changeTimestamps()" /><select id="_tsFromUnit" class="tiny">
@@ -66,6 +55,17 @@
 		<option value="min">min</option>
 		<option value="day" selected>day</option>
 	</select>ago
+	<hr>
+	
+	Message: <select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
+	<button id="_send" onclick="sendMessage()">Send</button>
+	<div style="float:right; margin-right:50px;">
+		<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
+		<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
+	</div>
+	<hr style="clear:both">
+	
+	
 	
 	
 </div>
@@ -79,7 +79,7 @@
 </dialog>
 
 
-<dialog id="_dialog2" closedby="closerequest" onclose="console.log(this.returnValue || 0)" style="width:35%;">
+<dialog id="_credsDialog" closedby="none" style="width:35%;">
 	<form method="dialog">
 		<div style="displaY:grid; grid-template-columns: 1fr 9fr; grid-row-gap: 25px;">
 			<div><label for="a"><b>ClientId:</b>&emsp;</label></div>
@@ -95,14 +95,17 @@
 			<div><input id="d" type="text" name="refreshToken" class="chkbx3" required /></div>
 		</div>
 		
+		<menu>
+			<label><input id="_credDialogRemember" type="checkbox" onchange="updateAutoState(this)" />Remember for future</label>
+		</menu>
+		
 		<menu style="text-align: center;">
-			<button type="button" onclick="this.value=754; _dialog2.close()">❌Cancel</button>
-			<button type="submit" onclick="this.value=JSON.stringify([a,b,c,d].map(i=>i.value));">✅Confirm</button>
+			<button type="button" onclick="_credsDialog.close()">❌Cancel</button>
+			<button type="submit" onclick="this.value=JSON.stringify([[a,b,c,d].map(i=>i.value),_credDialogRemember.checked]);">✅Confirm</button>
 		</menu>
 	</form>
 </dialog>
 
-<button onclick="_dialog2.showModal()">d.showModal()</button>
 
 
 
@@ -125,7 +128,7 @@
 	height: 250px;
 "><pre style="
 	height: 100%;
-">Events:<code id="_res2" class="language-json code"></code></pre></div>
+">Events:<code id="_evtRes" class="language-json code"></code></pre></div>
 
 
 <div id="_msg" style="
@@ -136,13 +139,6 @@
 	display: grid;
 	grid-template-columns: auto auto auto auto;
 "></div>
-
-<!-- <textarea id="_res" cols="50" rows="30" class="language-js" style="
-	resize:none;
-	border: 1px solid red;
-	float:right;
-	width:39%;
-" readonly></textarea> -->
 
 <div style="
 	border: 1px solid magenta;

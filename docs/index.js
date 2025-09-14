@@ -1,6 +1,7 @@
 const conf = JSON.parse(localStorage.conf || '{}');
 const {log} = console;
 let creds;
+let accessToken;
 let ws;
 let wsOnMsgHooks = {};
 let heartbeatCountdownIntervalId;
@@ -8,20 +9,57 @@ const uid = (i => () => 'cm_id_' + i++)(1);
 const sortAlphabet = (a, b) => a.localeCompare(b);
 
 if (!conf.creds) {
-	alert('You have not provided your credentials yet.');
+	_cred.innerText = 'Credentials (❌)';
 	_credForget.disabled = true;
-	changeCredentials();
 } else {
 	creds = conf.creds;
+	({accessToken} = creds);
 	_cred.innerText = 'Credentials (✅)';
 	_credForget.disabled = false;
+	
+	Object.keys(creds).map(k =>
+		_credsDialog.querySelector(`input[name=${k}]`).value = creds[k]
+	);
 }
 
-const { accessToken } = creds;
+function changeCredentials() {
+	_credsDialog.showModal();
+	_credsDialog.onclose = function () {
+		const res = _credsDialog.returnValue;
+		if (res) {
+			const [newCreds, shouldRemember] = JSON.parse(res);
+			const [clientId,clientSecret,at,refreshToken] = newCreds;
+			creds = {clientId,clientSecret,accessToken:at,refreshToken};
+			accessToken = at;
+			if (shouldRemember) {
+				conf.creds = creds;
+				localStorage.conf = JSON.stringify(conf);
+			}
+			_cred.innerText = 'Credentials (✅)';
+			_credForget.disabled = false;
+			_cred.style.border = '';
+		} else {
+			if (!conf.creds) _cred.innerText = 'Credentials (❌)';
+		}
+		_credsDialog.onclose = undefined;
+	};
+}
+function forgetCredentials() {
+	if (confirm('Are you sure?')) {
+		Object.keys(creds).map(k => 
+			_credsDialog.querySelector(`input[name=${k}]`).value = ''
+		);
+		delete conf.creds;
+		localStorage.conf = JSON.stringify(conf);
+		_cred.innerText = 'Credentials (❌)';
+		_credForget.disabled = true;
+	}
+}
+
+
 
 const pb = protobuf.Root.fromJSON(window.pbCompiledSrc).nested;
 window.pbCompiledSrc = undefined;
-
 const {reqs,ress,evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
 
 
@@ -48,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	_symLoadAuto.checked = conf.autoLoadSymbols;
 	_msgsFilter2Way.checked = conf.filterMessages2Way;
 	_msgsFilter1Way.checked = conf.filterMessages1Way;
+	_credDialogRemember.checked = conf.credDialogRemember;
 	
 	if (conf.autoConnect) {
 		_conn.dispatchEvent(new Event('click',{bubbles:true}));
@@ -71,6 +110,7 @@ function updateAutoState(el) {
 	if (id === '_symLoadAuto') conf.autoLoadSymbols = !!el.checked;
 	if (id === '_msgsFilter2Way') conf.filterMessages2Way = !!el.checked;
 	if (id === '_msgsFilter1Way') conf.filterMessages1Way = !!el.checked;
+	if (id === '_credDialogRemember') conf.credDialogRemember = !!el.checked;
 	localStorage.conf = JSON.stringify(conf);
 }
 
@@ -100,133 +140,20 @@ function changeTimestamps() {
 	
 	if (_msg.hasChildNodes()) {
 		const _targ1 = _msg.querySelector('input[name="fromTimestamp"]');
-		if (_targ1) _targ1.value = frm;
-		// inja
+		if (_targ1) _targ1.value = getRelativeTimestamp([frm, _tsFromUnit.value]);
+		
 		const _targ2 = _msg.querySelector('input[name="toTimestamp"]');
-		if (_targ2) _targ2.value = to;
+		if (_targ2) _targ2.value = getRelativeTimestamp([to, _tsToUnit.value]);
 	}
 }
 
-
-
-function loadAccounts() {
-	// TODO: flasher chain, if:
-	// not connected, not app auth
-	if (!ws || ws.readyState !== WebSocket.OPEN ||
-		_appAuth.innerText === 'Auth App') {
-		
-		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
-		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
-		
-		return;
-	}
-	_conn.style.border = '';
-	_appAuth.style.border = '';
-	_accLoad.style.border = '';
-	_dialogMsg.innerHTML = '';
-	_dialogMsg.style.color = '';
-	
-	_accLoad.disabled = true;
-	_accLoad.innerText = 'Load (...)';
-	
-	const clientMsgId = uid();
-	wsOnMsgHooks[clientMsgId] = res => {
-		const {payloadType} = res;
-		if (res.payloadType === 2150) {
-			const accs = res.payload.ctidTraderAccount;
-			_acc.innerHTML = accs.map(({ctidTraderAccountId: id, isLive, brokerTitleShort: broker})=>
-				`<option value="${id}">${id} - ${isLive?'Live':'Demo'} - ${broker}</option>`
-			);
-			_accLoad.disabled = true;
-			_accLoad.innerText = 'Load (✅)';
-			if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
-			if (_accAuthAuto.checked) _accAuth.dispatchEvent(new Event('click',{bubbles:true}));
-		} else if (payloadType === 2142) {
-			const {errorCode, description} = res.payload;
-			_appAuth.style.border = '2px dashed red';
-			_accLoad.innerText = 'Load (❌)';
-			_accLoad.disabled = false;
-			_dialogMsg.style.color = 'red';
-			_dialogMsg.innerHTML = '❌Could not load accounts <br><br>'+
-				`<b>${errorCode}</b>: ${description}`;
-			_dialog.showModal();
-		} else {
-			_dialogMsg.innerText = '🤷‍♂️Dont\' know what happened. <br><br>' + JSON.stringify(payload);
-			_dialog.showModal();
-		}
-		delete wsOnMsgHooks[clientMsgId];
-		
-	};
-	const req = {clientMsgId, payloadType: 2149, payload: {accessToken}};
-	ws.sendj(req);
+function getRelativeTimestamp([value, unit]) {
+	const d = new Date();
+	const m = ({sec:'Seconds',min:'Minutes',day:'Date'})[unit];
+	d['set'+m](d['get'+m]() - value);
+	return +d;
 }
 
-
-
-function authAccount() {
-	// TODO: flasher chain, if:
-	// not connected, not app auth, not acc load
-	if (!ws || ws.readyState !== WebSocket.OPEN ||
-		_appAuth.innerText === 'Auth App' ||
-		!_acc.options.length) {
-		
-		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
-		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
-		if (!_acc.options.length) _accLoad.style.border = '2px dashed red';
-		
-		return;
-	}
-	_conn.style.border = '';
-	_appAuth.style.border = '';
-	_accLoad.style.border = '';
-	_dialogMsg.innerHTML = '';
-	_dialogMsg.style.color = '';
-	
-	_accAuth.innerText = 'Auth (...)';
-	_accAuth.disabled = true;
-	
-	const clientMsgId = uid();
-	wsOnMsgHooks[clientMsgId] = res => {
-		const {payloadType} = res;
-		if (payloadType === 2103) {
-			_accAuth.innerText = 'Auth (✅)';
-			if (_symLoadAuto.checked) _symLoad.dispatchEvent(new Event('click',{bubbles:true}));
-		} else if (payloadType === 2142) {
-			const {errorCode, description} = res.payload;
-			if (errorCode === 'ALREADY_LOGGED_IN') {
-				_accAuth.innerText = 'Auth (✅)';
-			} else {
-				_accAuth.innerText = 'Auth (❌)';
-				_dialogMsg.style.color = 'red';
-				_dialogMsg.innerHTML = `<b>${errorCode}</b>: ${description}`;
-				_dialog.showModal();
-				_accAuth.disabled = false;
-			}
-		} else {
-			_accAuth.innerText = 'Auth (🤷‍♂️)';
-			_dialogMsg.innerText = JSON.stringify(payload);
-			_dialog.showModal();
-			_accAuth.disabled = false;
-		}
-		delete wsOnMsgHooks[clientMsgId];
-	};
-	const req = {clientMsgId, payloadType: 2102, payload: {
-		accessToken,
-		ctidTraderAccountId: +_acc.selectedOptions[0].value,
-	}};
-	ws.sendj(req);
-}
-
-function changeAccount(newAccountId) {
-	if (_msg.hasChildNodes()) {
-		const _targ = _msg.querySelector('input[name="ctidTraderAccountId"]');
-		if (_targ) _targ.value = newAccountId;
-	}
-	if (_accAuth.disabled) {
-		_accAuth.disabled = false;
-		_accAuth.innerText = 'Auth (❌)';
-	}
-}
 
 
 
@@ -245,6 +172,7 @@ function loadSymbols() {
 		
 		return;
 	}
+	_cred.style.border = '';
 	_conn.style.border = '';
 	_appAuth.style.border = '';
 	_accLoad.style.border = '';
@@ -289,16 +217,146 @@ function changeSymbol(newSymbolId) {
 	}
 }
 
-function authApplication() {
-	if (!ws || ws.readyState !== WebSocket.OPEN) {
-		_conn.style.border = '2px dashed red';
+
+
+function authAccount() {
+	// TODO: flasher chain, if:
+	// not connected, not app auth, not acc load
+	if (!creds || !ws || ws.readyState !== WebSocket.OPEN ||
+		_appAuth.innerText === 'Auth App' ||
+		!_acc.options.length) {
+		
+		if (!creds) _cred.style.border = '2px dashed red';
+		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
+		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
+		if (!_acc.options.length) _accLoad.style.border = '2px dashed red';
+		
 		return;
 	}
+	_cred.style.border = '';
+	_conn.style.border = '';
+	_appAuth.style.border = '';
+	_accLoad.style.border = '';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
+	
+	_accAuth.innerText = 'Auth (...)';
+	_accAuth.disabled = true;
+	
+	const clientMsgId = uid();
+	wsOnMsgHooks[clientMsgId] = res => {
+		const {payloadType} = res;
+		if (payloadType === 2103) {
+			_accAuth.innerText = 'Auth (✅)';
+			if (_symLoadAuto.checked) _symLoad.dispatchEvent(new Event('click',{bubbles:true}));
+		} else if (payloadType === 2142) {
+			const {errorCode, description} = res.payload;
+			if (errorCode === 'ALREADY_LOGGED_IN') {
+				_accAuth.innerText = 'Auth (✅)';
+			} else {
+				_accAuth.innerText = 'Auth (❌)';
+				_dialogMsg.style.color = 'red';
+				_dialogMsg.innerHTML = `<b>${errorCode}</b>: ${description}`;
+				_dialog.showModal();
+				_accAuth.disabled = false;
+			}
+		} else {
+			_accAuth.innerText = 'Auth (🤷‍♂️)';
+			_dialogMsg.innerText = JSON.stringify(payload);
+			_dialog.showModal();
+			_accAuth.disabled = false;
+		}
+		delete wsOnMsgHooks[clientMsgId];
+	};
+	const req = {clientMsgId, payloadType: 2102, payload: {
+		accessToken,
+		ctidTraderAccountId: +_acc.selectedOptions[0].value,
+	}};
+	ws.sendj(req);
+}
+
+
+function changeAccount(newAccountId) {
+	if (_msg.hasChildNodes()) {
+		const _targ = _msg.querySelector('input[name="ctidTraderAccountId"]');
+		if (_targ) _targ.value = newAccountId;
+	}
+	if (_accAuth.disabled) {
+		_accAuth.disabled = false;
+		_accAuth.innerText = 'Auth (❌)';
+	}
+}
+
+
+function loadAccounts() {
+	// TODO: flasher chain, if:
+	// not connected, not app auth
+	if (!creds || !ws || ws.readyState !== WebSocket.OPEN ||
+		_appAuth.innerText === 'Auth App') {
+		
+		if (!creds) _cred.style.border = '2px dashed red';
+		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
+		if (_appAuth.innerText === 'Auth App') _appAuth.style.border = '2px dashed red';
+		
+		return;
+	}
+	_cred.style.border = '';
+	_conn.style.border = '';
+	_appAuth.style.border = '';
+	_accLoad.style.border = '';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
+	
+	_accLoad.disabled = true;
+	_accLoad.innerText = 'Load (...)';
+	
+	const clientMsgId = uid();
+	wsOnMsgHooks[clientMsgId] = res => {
+		const {payloadType} = res;
+		if (res.payloadType === 2150) {
+			const accs = res.payload.ctidTraderAccount;
+			_acc.innerHTML = accs.map(({ctidTraderAccountId: id, isLive, brokerTitleShort: broker})=>
+				`<option value="${id}">${id} - ${isLive?'Live':'Demo'} - ${broker}</option>`
+			);
+			_accLoad.disabled = true;
+			_accLoad.innerText = 'Load (✅)';
+			if (_msgs.options.length) _msgs.dispatchEvent(new Event('change',{bubbles:true}));
+			if (_accAuthAuto.checked) _accAuth.dispatchEvent(new Event('click',{bubbles:true}));
+		} else if (payloadType === 2142) {
+			const {errorCode, description} = res.payload;
+			_appAuth.style.border = '2px dashed red';
+			_accLoad.innerText = 'Load (❌)';
+			_accLoad.disabled = false;
+			_dialogMsg.style.color = 'red';
+			_dialogMsg.innerHTML = '❌Could not load accounts <br><br>'+
+				`<b>${errorCode}</b>: ${description}`;
+			_dialog.showModal();
+		} else {
+			_dialogMsg.innerText = '🤷‍♂️Dont\' know what happened. <br><br>' + JSON.stringify(payload);
+			_dialog.showModal();
+		}
+		delete wsOnMsgHooks[clientMsgId];
+		
+	};
+	
+	const req = {clientMsgId, payloadType: 2149, payload: {accessToken}};
+	ws.sendj(req);
+}
+
+function authApplication() {
+	if (!creds || !ws || ws.readyState !== WebSocket.OPEN) {
+		if (!creds) _cred.style.border = '2px dashed red';
+		if (!ws || ws.readyState !== WebSocket.OPEN) _conn.style.border = '2px dashed red';
+		return;
+	}
+	_cred.style.border = '';
+	_conn.style.border = '';
+	_appAuth.style.border = '';
+	
 	_appAuth.disabled = true;
 	_appAuth.innerText = 'Auth App (...)';
-	_appAuth.style.border = '';
-	_conn.style.border = '';
-	_appAuthLabel.innerHTML = '';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
 	
 	const clientMsgId = uid();
 	wsOnMsgHooks[clientMsgId] = res => {
@@ -309,13 +367,15 @@ function authApplication() {
 		} else if (payloadType === 2142) {
 			const {errorCode, description} = res.payload;
 			_appAuth.innerText = 'Auth App (❌)';
-			_appAuthLabel.style.color = 'red';
-			_appAuthLabel.innerHTML = `<b>${errorCode}</b>: ${description}`;
+			_dialogMsg.style.color = 'red';
+			_dialogMsg.innerHTML = `<b>${errorCode}</b>: ${description}`;
+			_dialog.showModal();
 			_appAuth.disabled = false;
 		} else {
 			_appAuth.innerText = 'Auth App (🤷‍♂️)';
-			_appAuthLabel.style.color = '';
-			_appAuthLabel.innerText = JSON.stringify(payload);
+			_dialogMsg.style.color = '';
+			_dialogMsg.innerHTML = JSON.stringify(payload);
+			_dialog.showModal();
 			_appAuth.disabled = false;
 		}
 		delete wsOnMsgHooks[clientMsgId];
@@ -353,6 +413,9 @@ function establishConnection() {
 		if (eventPayloadTypes.has(payloadType)) {
 			const el = eventElems[payloadType];
 			flashElem(el, 'khaki');
+			const jsonstr = JSON.stringify(msg, null, 2);
+			_evtRes.innerHTML = Prism.highlight(jsonstr, Prism.languages.javascript, 'javascript');
+			return;
 		}
 		
 		if (payloadType === 51) {
@@ -367,7 +430,9 @@ function establishConnection() {
 				clearInterval(heartbeatCountdownIntervalId);
 				_hbtimer.innerText = '';
 			}
+			return;
 		}
+		
 		if (Object.keys(wsOnMsgHooks).length) wsOnMsgHooks[msg.clientMsgId](msg);
 		
 		const jsonstr = JSON.stringify(msg, null, 2);
@@ -468,11 +533,11 @@ function setupMsg(selected, r='', recurring) {
 				if (type === 'bool') inptyp = 'checkbox';
 				if (type.startsWith('int') || type === 'double') inptyp = 'number';
 				let inpval =  '';
-				if (Object.keys(creds).includes(fieldkey)) {inpval = creds[fieldkey]; inptyp = 'password';}
+				if (creds && Object.keys(creds).includes(fieldkey)) {inpval = creds[fieldkey]; inptyp = 'password';}
 				if (fieldkey === 'ctidTraderAccountId' && _acc.options.length) inpval = +_acc.selectedOptions[0].value;
 				if (fieldkey === 'symbolId' && _sym.options.length) inpval = +_sym.selectedOptions[0].value;
-				if (fieldkey === 'fromTimestamp') {
-					// here
+				if (fieldkey === 'fromTimestamp' || fieldkey === 'toTimestamp') {
+					// inja
 				}
 				r += `<div><input type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
@@ -495,41 +560,7 @@ function setupMsg(selected, r='', recurring) {
 }
 
 
-function changeCredentials() {
-	const promptForCredentials = () => {
-		const clientId = prompt('ClientID:');
-		if (!clientId) return;
-		const clientSecret = prompt('ClientSecret:');
-		if (!clientSecret) return;
-		const accessToken = prompt('AccessToken:');
-		if (!accessToken) return;
-		const refreshToken = prompt('RefreshToken:');
-		if (!refreshToken) return;
-		return {clientId,clientSecret,accessToken,refreshToken};
-	};
-	
-	const newCreds = promptForCredentials();
-	if (newCreds) {
-		creds = newCreds;
-		if (confirm('Remember for future?')) {
-			conf.creds = newCreds;
-			localStorage.conf = JSON.stringify(conf);
-		}
-		_cred.innerText = 'Credentials (✅)';
-		_credForget.disabled = false;
-	} else {
-		alert('❌ You did not provide all credentials! (previously saved ones will not be modified)');
-		if (!conf.creds) _cred.innerText = 'Credentials (❌)';
-	}
-}
-function forgetCredentials() {
-	if (confirm('Are you sure?')) {
-		delete conf.creds;
-		localStorage.conf = JSON.stringify(conf);
-		_cred.innerText = 'Credentials (❌)';
-		_credForget.disabled = true;
-	}
-}
+
 
 
 
