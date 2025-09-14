@@ -89,7 +89,7 @@ body {
 }
 #_eventsSectionContainer {
 	float: left;
-	width: 23.5%;
+	width: 23%;
 	margin-left: 4px;
 }
 #_msg {
@@ -104,7 +104,16 @@ body {
 	height: 100%;
 }
 
-@media screen and (max-width: 1180px) {
+@media screen and (min-width: 1600px) {
+	#_optsSectionContainer { width: 81%;}
+	#_eventsSectionContainer { width: 17%; }
+}
+@media screen and (min-width: 1180px) {
+	#_optsSectionContainer { width: 77%;}
+	#_eventsSectionContainer { width: 21%; }
+}
+
+@media screen and (max-width: 1185px) {
 	#_controlSection { width: 56%;}
 	#_resSectionContainer { width: 44%; }
 }

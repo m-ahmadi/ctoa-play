@@ -34,7 +34,7 @@ const {evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
 _evts.innerHTML = evts.map(i=>i.slice(0,-5)).map(i => ''+
 `<div class="flasher">
 	<label style="display:block">
-		<input type="checkbox" class="flasher-input" checked />${i}</label>
+		<input type="checkbox" name="${i}" class="flasher-input" />${i}</label>
 </div>`).join('\n');
 
 // _evts.innerHTML = '<select size="13" style="font-size: smaller;" multiple>' + evts.map(i=>i.slice(0,-5))
@@ -97,7 +97,32 @@ document.addEventListener('DOMContentLoaded', function () {
 	
 	changeMessage();
 	if (_msgs.options.length) emit(_msgs, 'change');
+	
+	const {events} = conf;
+	if (events) {
+		const checkboxes = [..._evts.querySelectorAll('input[type=checkbox]')];
+		for (const el of checkboxes) el.checked = events[el.name];
+		const allChecked = checkboxes.every(i=>i.checked);
+		_evtAllSwitch.checked = allChecked;
+		_evtAllSwitch.indeterminate = !allChecked && checkboxes.some(i=>i.checked);
+	}
 });
+
+_evts.addEventListener('change', function (e) {
+	const checkboxes = [..._evts.querySelectorAll('input[type=checkbox]')];
+	conf.events = Object.fromEntries(checkboxes.map(i => [i.name, i.checked]));
+	localStorage.conf = JSON.stringify(conf);
+	const allChecked = checkboxes.every(i=>i.checked);
+	_evtAllSwitch.checked = allChecked;
+	_evtAllSwitch.indeterminate = !allChecked && checkboxes.some(i=>i.checked);
+});
+function toggleAllEvents(bool) {
+	for (const el of _evts.querySelectorAll('input[type=checkbox]')) {
+		el.checked = bool;
+	}
+	emit(_evts, 'change');
+}
+
 
 function changeCredentials() {
 	_credsDialog.showModal();
@@ -188,6 +213,7 @@ function updateAutoState(el) {
 	}
 	localStorage.conf = JSON.stringify(conf);
 }
+
 
 function setLockIcon(container, bool) {
 	// container.innerText = ({'true':'🔒','false':'🔓'})[bool];
@@ -515,7 +541,10 @@ function establishConnection() {
 			_evtRes.innerHTML = Prism.highlight(jsonstr, Prism.languages.javascript, 'javascript');
 			return; */
 			
-			// TODO: event checkboxes
+			// ✔TODO: event checkboxes
+			if (!el.querySelector('input').checked) {
+				return;
+			}
 		}
 		
 		if (payloadType === 51) {
@@ -560,7 +589,7 @@ function constructPayload(fields, r={}, recurring) {
 		} else {
 			const {type} = formElem;
 			let val;
-			// TODO: if text|pass|num input value is non-exist, then don't add field
+			// ✔TODO: if text|pass|num input value is non-exist, then don't add field
 			if (['text','password','number'].includes(type) && formElem.value) {
 				val = formElem.value;
 				if (type === 'number') val = +val;
@@ -608,7 +637,7 @@ function sendMessage() {
 	
 	/* const fields = [..._msg.querySelectorAll('input'), ..._msg.querySelectorAll('select')];
 	
-	// TODO: handle deep field
+	// ✔TODO: handle deep field
 	const rdy = fields.map(el => {
 		const {type, name: key} = el;
 		let val;
@@ -659,7 +688,7 @@ function setupMsg(selected, r='', recurring) {
 			fieldEnum = Object.keys(o).map(k => [o[k], k]);
 			fieldEnumFmt = fieldEnum.map(i=>i.join('=')).join(', ');
 		}
-		
+		// TODO: make <label for> tags
 		if (fieldkey === 'payloadType') {
 			r += `<div><u>${fieldkey}</u>:</div>`;
 			r += `<div><code class="cuscode">${field.defaultValue}</code></div>`;
