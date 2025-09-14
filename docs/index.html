@@ -5,19 +5,21 @@
 	<script src="lib/prism.min.js"></script>
 </head>
 
-<div style="
-	float: left;
-	width: 40%;
+<div id="_controlSection">
+
+<div id="_optsSectionContainer" style="
 	border: 1px solid black;">
 	
-	<div class="optg">
-		<button id="_cred" onclick="changeCredentials()">Credentials</button><button id="_credForget" onclick="forgetCredentials()" class="tinybtn">Forget</button>
-		&emsp;&emsp;
-		
-		<button id="_conn" onclick="establishConnection()">Connect</button><label><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
-		&emsp;&emsp;
-		
-		<button id="_appAuth" onclick="authApplication()">Auth App</button><label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+	<div class="optg" style="display: flex;">
+		<div style="flex: 1 1 auto">
+			<button id="_cred" onclick="changeCredentials()">Credentials</button><button id="_credForget" onclick="forgetCredentials()" class="tinybtn">Forget</button>
+		</div>
+		<div style="flex: 1 1 auto">
+			<button id="_conn" onclick="establishConnection()">Connect</button><label id="_connAutoContainer"><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+		</div>
+		<div style="flex: 1 1 auto">
+			<button id="_appAuth" onclick="authApplication()">Auth App</button><label id="_appAuthAutoContainer"><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+		</div>
 	</div>
 	
 	<div class="optg" style="display:flex;">
@@ -32,70 +34,85 @@
 		</div>
 	</div>
 	
-	<div class="optg">
-		Account: <select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
-		<span id="_accLockContainer">
-			<input id="_accLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_accLockIcon" for="_accLock">
-				<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
-					<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
-				</svg>
-			</label>
-		</span>
-		<button id="_accLoad" onclick="loadAccounts()" class="tinybtn" title="Load all accounts.">Load</button><label id="_accLoadAutoText"><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
-		<button id="_accAuth" onclick="authAccount()" class="tinybtn">Auth</button><label id="_accAuthAutoContainer"><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+	<div class="optg" style="display: flex;">
+		<span style="flex: 1 1 auto;">Account: </span>
+		<div style="flex: 1 1 auto;" >
+			<select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
+			<span id="_accLockContainer">
+				<input id="_accLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_accLockIcon" for="_accLock">
+					<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
+						<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+					</svg>
+				</label>
+			</span>
+		</div>
+		<div style="flex: 1 1 auto;">
+			<button id="_accLoad" onclick="loadAccounts()" class="tinybtn">Load</button><label id="_accLoadAutoContainer"><input id="_accLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" /><span id="_accLoadAutoText">auto</span></label>
+		</div>
+		<div style="flex: 1 1 auto;">
+			<button id="_accAuth" onclick="authAccount()" class="tinybtn">Auth</button><label id="_accAuthAutoContainer"><input id="_accAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+		</div>
 	</div>
 	
-	<div class="optg">
-		Symbol: <select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
-		<span id="_symLockContainer">
-			<input id="_symLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_symLockIcon" for="_symLock">
-				<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
-					<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
-				</svg>
-			</label>
-		</span>
-		<button id="_symLoad" onclick="loadSymbols()" class="tinybtn" title="Load all symbols.">Load</button><label id="_symLoadAutoText"><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+	<div class="optg" style="display: flex;">
+		<span style="flex: 1 1 auto;" >Symbol:</span>
+		<div style="flex: 1 1 auto;" >
+			<select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
+			<span id="_symLockContainer">
+				<input id="_symLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_symLockIcon" for="_symLock">
+					<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
+						<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+					</svg>
+				</label>
+			</span>
+		</div>
+		<div style="flex: 1 1 auto;" >
+			<button id="_symLoad" onclick="loadSymbols()" class="tinybtn">Load</button><label id="_symLoadAutoContainer"><input id="_symLoadAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" /><span id="_symLoadAutoText">auto</span></label>
+		</div>
 	</div>
 	
-	<div class="optg">
-		<span id="_tsSectionLabel">Timestamp: </span>&emsp;&emsp;<span id="_tsFromContainer"> from:
-		<input id="_tsFromVal" type="number" min="1" value="1" class="tiny" style="width:40px;" oninput="changeTimestamps(this)" /><select id="_tsFromUnit" class="tiny">
-			<option value="sec">sec</option>
-			<option value="min">min</option>
-			<option value="day" selected>day</option>
-		</select>ago</span>
-		&emsp;&emsp;
-		<span id="_tsLockContainer">
+	<div class="optg" style="display: flex;">
+		<span id="_tsSectionLabel" style="flex: 1 1 auto;">Timestamp:</span>
+		<span id="_tsFromContainer" style="flex: 1 1 auto;">from:
+			<input id="_tsFromVal" type="number" min="1" value="1" class="tiny" style="width:40px;" oninput="changeTimestamps(this)" /><select id="_tsFromUnit" class="tiny">
+				<option value="sec">sec</option>
+				<option value="min">min</option>
+				<option value="day" selected>day</option>
+			</select>ago
+		</span>
+		<span id="_tsLockContainer" style="flex: 1 1 auto;">
 			<input id="_tsLock" type="checkbox" class="chkbx2" onchange="updateAutoState(this)" /><label id="_tsLockIcon" for="_tsLock">
 				<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
 					<path d="M12 11V7a4 4 0 118 0"></path><rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
 				</svg>
 			</label>
 		</span>
-		&emsp;&emsp; <span id="_tsToContainer">to:
-		<input id="_tsToVal" type="number" min="0" value="0" class="tiny" style="width:40px;" oninput="changeTimestamps(this)" /><select id="_tsToUnit" class="tiny">
-			<option value="sec">sec</option>
-			<option value="min">min</option>
-			<option value="day" selected>day</option>
-		</select>ago</span>
+		<span id="_tsToContainer" style="flex: 1 1 auto;">to:
+			<input id="_tsToVal" type="number" min="0" value="0" class="tiny" style="width:40px;" oninput="changeTimestamps(this)" /><select id="_tsToUnit" class="tiny">
+				<option value="sec">sec</option>
+				<option value="min">min</option>
+				<option value="day" selected>day</option>
+			</select>ago
+		</span>
 	</div>
 	
-	<div style="background:khaki;" class="optg">
-		<b>Message: </b><select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
-		<button id="_send" onclick="sendMessage()">Send</button>
-		<div style="float:right; margin-right:50px;">
+	<div class="optg" style="background:khaki; display:flex;" >
+		<b style="flex: 1 1 auto;">Message:</b>
+		<div style="flex: 1 1 auto;">
+			<select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
+			<button id="_send" onclick="sendMessage()">Send</button>
+		</div>
+		<div id="_msgFiltersContainer" style="margin-left: auto;">
 			<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
 			<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
 		</div>
-		<span style="clear:both"></span>
+		
 	</div>
 	
 </div>
 
 
-<div style="
-	float: left;
-	margin-left: 10px;
+<div id="_eventsSectionContainer" style="
 	border: 1px solid teal;
 ">
 	<div style="
@@ -103,12 +120,32 @@
 		border-bottom: 1px solid black;
 		text-align: center;
 		padding-bottom: 3px;
-	"><strong>🔔Events</strong></div>
-	<table id="_evts" style="
-		border-collapse: collapse;
-		font-size: small;
-	"></table>
+		display: flex;
+	">
+		<input type="checkbox" style="margin:0; margin-right: auto;" />
+		<strong style="flex: 1 1 auto;">🔔Events</strong>
+	</div>
+	<div id="_evts" style="font-size: small;"></div>
 </div>
+
+<div id="_msg" style="
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+	
+	border: 1px solid lightgrey;
+	border-radius: 5px;
+	margin-top: 5px;
+	padding: 4px;
+"></div>
+
+</div>
+
+<div id="_resSectionContainer">
+	<pre style="height: 100%; margin:0;"><code id="_res" class="language-json code"></code></pre>
+</div>
+
+
+
 
 
 <!-- <div style="
@@ -120,28 +157,6 @@
 	height: 100%;
 ">Events:<code id="_evtRes" class="language-json code"></code></pre></div>
  -->
-
-<div style="
-	/* border: 1px solid magenta; */
-	float: right;
-	width: 45%;
-"><pre style="height: 100%; margin:0;">
-<code id="_res" class="language-json code"></code></pre></div>
-
-
-<div id="_msg" style="
-	/* clear: both; */
-	float: left;
-	width: 54%;
-	display: grid;
-	grid-template-columns: auto auto auto auto;
-	
-	border: 1px solid lightgrey;
-	border-radius: 5px;
-	margin-top: 5px;
-	padding: 4px;
-"></div>
-
 
 
 
@@ -170,7 +185,7 @@
 		</div>
 		
 		<menu>
-			<label><input id="_credDialogRemember" type="checkbox" onchange="updateAutoState(this)" />Remember for future</label>
+			<label><input id="_credDialogRemember" type="checkbox" onchange="updateAutoState(this)" style="vertical-align: bottom; margin: 0px 3px 1px 0;" />Remember for future</label>
 		</menu>
 		
 		<menu style="text-align: center;">

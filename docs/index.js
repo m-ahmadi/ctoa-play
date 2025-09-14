@@ -28,10 +28,19 @@ const pb = protobuf.Root.fromJSON(window.pbCompiledSrc).nested;
 window.pbCompiledSrc = undefined;
 const {evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
 
+// _evts.innerHTML = evts.map(i=>i.slice(0,-5))
+// 	.map(i => `<tr><td><div class="flasher">${i}</div></td></tr>`).join('\n');
 
-_evts.innerHTML = evts.map(i=>i.slice(0,-5))
-	.map(i => `<tr><td><div class="flasher">${i}</div></td></tr>`).join('\n');
+_evts.innerHTML = evts.map(i=>i.slice(0,-5)).map(i => ''+
+`<div class="flasher">
+	<label style="display:block">
+		<input type="checkbox" class="flasher-input" checked />${i}</label>
+</div>`).join('\n');
 
+// _evts.innerHTML = '<select size="13" style="font-size: smaller;" multiple>' + evts.map(i=>i.slice(0,-5))
+// 	.map(i => `<option value="${i}" class="flasher" selected>${i}</option>`).join('\n')
+// 	+'</select>';
+	
 eventElems = Object.fromEntries([..._evts.querySelectorAll('.flasher')].map(el => [
 	pb['ProtoOA'+el.innerText+'Event'].fields.payloadType.defaultValue, el
 ]));
@@ -677,7 +686,7 @@ function setupMsg(selected, r='', recurring) {
 				if (fieldkey === 'toTimestamp') inpval = getRelativeTimestamp(+_tsToVal.value, _tsToUnit.selectedOptions[0].value);
 				r += `<div><input type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
-			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${type}</div>`;
+			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${type.slice(7)}</div>`;
 			r += `<div class="${ncccolrs[required]}">${required?'required':'optional'}</div>`;
 			r += '\n';
 		}
@@ -765,14 +774,66 @@ icons.unlock = ''+
   <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
 </svg>`;
 
-_acc.title = 'Account used for "ctidTraderAccount" field of a message. (if message has such field)';
-_accLockContainer.title = 'If locked, at next page refresh, selected account is used and account loading is disabled.';
-_accAuthAutoContainer.title = 'Automatic account auth. (effective at next page refresh)';
-_sym.title = 'Symbol used for "symbolId" field of a message. (if message has such field)';
-_symLockContainer.title = 'If locked, at next page refresh, selected symbol is used and symbol loading is disabled.';
-_accLoadAutoText.title = 'Automatic account loading. (effective at next page refresh)';
+_cred.title = `Input your credentials here.`;
+_credForget.title = `Forget remembered credentials.`;
 
-_tsSectionLabel.title = 'Timestamps used for "fromTimestamp" and "toTimestamp" fields of a message. (if message has such fields)';
-_tsFromContainer.title = 'Timestamp for "fromTimestamp" field, specified in relative manner. (0 means now)';
-_tsToContainer.title = 'Timestamp for "toTimestamp" field, specified in relative manner. (0 means now)';
-_tsLockContainer.title = 'Lock distance between "from" and "to" values.';
+_conn.title = `Connect to the server.`;
+_connAutoContainer.title = `Automatically connect to server.
+
+Note:
+  Effective at next page refresh.
+`;
+
+_appAuth.title = `Authenticate the application.
+
+Requires:
+  You have already provided your credentials.
+  You are already connected to the server.`;
+_appAuthAutoContainer.title = `Automatically authenticate the application.
+
+Note:
+  Effective at next page refresh.
+`;
+
+_acc.title = `Account used for "ctidTraderAccount" field of a message.
+(if message has such field)`;
+_accLoad.title = 'Load all accounts.';
+_accLockContainer.title = `Lock to currently selected account.
+
+Note:
+  Disables account loading.
+  Effective at next page refresh.`;
+_accLoadAutoContainer.title = `Automatic account loading.
+
+Note:
+  Eeffective at next page refresh.`;
+_accAuth.title = `Authenticate the selected account.`;
+_accAuthAutoContainer.title = `Automatic account auth.
+
+Note:
+  Effective at next page refresh.`;
+
+_sym.title = `Symbol used for "symbolId" field of a message.
+(if message has such field)`;
+_symLoad.title = `Load all symbols.`;
+_symLockContainer.title = `Lock to currently selected symbol.
+
+Note:
+  Disables symbol loading.
+  Effective at next page refresh.`;
+_symLoadAutoContainer.title = `Automatic symbol loading.
+
+Note: 
+  Effective at next page refresh.`
+
+_tsSectionLabel.title = `Timestamps used for "fromTimestamp" and "toTimestamp" fields of a message.
+(if message has such fields)`;
+_tsFromContainer.title = `Timestamp for "fromTimestamp" field,
+
+Note:
+  Specified in a relative manner. (0 means now)`;
+_tsToContainer.title = `Timestamp for "toTimestamp" field,
+
+Note:
+  Specified in a relative manner. (0 means now)`;
+_tsLockContainer.title = `Lock distance between "from" and "to" values.`;

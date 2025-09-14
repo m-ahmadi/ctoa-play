@@ -52,8 +52,13 @@ body {
 }
 
 
-tr {border-bottom: 1px solid grey;}
-tr:last-child {border-bottom: none;}
+.flasher {border-bottom: 1px solid grey;}
+.flasher:last-child {border-bottom: none;}
+.flasher-input {
+	vertical-align: middle;
+	margin: 0 1px 0 0;
+	accent-color: #e5e2a6;
+}
 
 .steplbls {float: right; border:1px dotted black;}
 
@@ -71,6 +76,66 @@ tr:last-child {border-bottom: none;}
 	padding: 1px 8px;
 }
 
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+/* layout conf */
+#_controlSection {
+	float: left;
+	width: 54%;
+}
+#_optsSectionContainer {
+	float: left;
+	width: 75%;
+}
+#_eventsSectionContainer {
+	float: left;
+	width: 23.5%;
+	margin-left: 4px;
+}
+#_msg {
+	float: left;
+	width: 100%;
+}
+
+
+#_resSectionContainer {
+	float: right;
+	width: 46%;
+	height: 100%;
+}
+
+@media screen and (max-width: 1180px) {
+	#_controlSection { width: 56%;}
+	#_resSectionContainer { width: 44%; }
+}
+@media screen and (max-width: 1140px) {
+	#_controlSection { width: 62%;}
+	#_resSectionContainer { width: 38%; }
+}
+@media screen and (max-width: 1020px) {
+	#_controlSection { width: 70%;}
+	#_resSectionContainer { width: 30%; }
+}
+@media screen and (max-width: 905px) {
+	#_controlSection { width: 75%;}
+	#_resSectionContainer { width: 25%; }
+}
+
+@media screen and (max-width: 570px) {
+	#_optsSectionContainer { width: 70%;}
+	#_eventsSectionContainer { width: 28%; }
+}
+
+@media screen and (max-width: 850px) {
+	#_controlSection {
+		width: 100%;
+	}
+	#_resSectionContainer {
+		float: left;
+		width: 100%;
+	}
+}
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
 
 .dum {
