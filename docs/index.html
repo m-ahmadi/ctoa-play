@@ -20,13 +20,13 @@
 		<button id="_appAuth" onclick="authApplication()">Auth App</button><label><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
 	</div>
 	
-	<div class="optg">
-		<label style="float: left;">
+	<div class="optg" style="display:flex;">
+		<label style="flex: 1 1 24%;">
 			<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />heartbeat me up&emsp;
 		</label>
-		<div style="display:grid; grid-template-columns: auto auto;">
-			<div id="_connKeepFlashTarget1" class="boxy">Client</div>
-			<div id="_connKeepFlashTarget2" class="boxy">Server 
+		<div style="flex: 3 2 auto; display: flex;">
+			<div id="_connKeepFlashTarget1" class="boxy" style="flex: 1 2 auto;">Client</div>
+			<div id="_connKeepFlashTarget2" class="boxy" style="flex: 1 2 auto;">Server 
 				<small><small><span id="_hbtimer"></span></small></small>
 			</div>
 		</div>
