@@ -688,7 +688,7 @@ function setupMsg(selected, r='', recurring) {
 			fieldEnum = Object.keys(o).map(k => [o[k], k]);
 			fieldEnumFmt = fieldEnum.map(i=>i.join('=')).join(', ');
 		}
-		// TODO: make <label for> tags
+		// ✔TODO: make <label for> tags
 		if (fieldkey === 'payloadType') {
 			r += `<div><u>${fieldkey}</u>:</div>`;
 			r += `<div><code class="cuscode">${field.defaultValue}</code></div>`;
@@ -696,9 +696,9 @@ function setupMsg(selected, r='', recurring) {
 			r += `<div></div>`;
 			r += `\n`;
 		} else {
-			r += `<div data-field>${fieldkey}:</div>`;
+			r += `<div data-field><label for="${fieldkey}">${fieldkey}:</label></div>`;
 			if (isFieldEnum) {
-				r += `<div><select name="${fieldkey}">`;
+				r += `<div><select id="${fieldkey}" name="${fieldkey}">`;
 				r += fieldEnum.map(([v,k])=>`<option value="${v}">${k}</option>`).join('\n');
 				r += `</select></div>`;
 			} else if (isFieldDeep) {
@@ -713,7 +713,7 @@ function setupMsg(selected, r='', recurring) {
 				if (fieldkey === 'symbolId' && _sym.options.length) inpval = +_sym.selectedOptions[0].value;
 				if (fieldkey === 'fromTimestamp') inpval = getRelativeTimestamp(+_tsFromVal.value, _tsFromUnit.selectedOptions[0].value);
 				if (fieldkey === 'toTimestamp') inpval = getRelativeTimestamp(+_tsToVal.value, _tsToUnit.selectedOptions[0].value);
-				r += `<div><input type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
+				r += `<div><input id="${fieldkey}" type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
 			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${type.slice(7)}</div>`;
 			r += `<div class="${ncccolrs[required]}">${required?'required':'optional'}</div>`;
