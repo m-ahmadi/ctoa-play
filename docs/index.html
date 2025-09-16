@@ -27,8 +27,8 @@
 	</div>
 	
 	<div class="optg" style="display:flex;">
-		<label style="flex: 1 1 24%;">
-			<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />heartbeat me up&emsp;
+		<label id="_connKeepContainer" style="flex: 1 1 24%;">
+			<input id="_connKeep" type="checkbox" onchange="updateAutoState(this)" class="chkbx" />Heartbeat me up&emsp;
 		</label>
 		<div style="flex: 3 2 auto; display: flex;">
 			<div id="_connKeepFlashTarget1" class="boxy" style="flex: 1 2 auto;">Client</div>
@@ -107,8 +107,8 @@
 			<button id="_send" onclick="sendMessage()">Send</button>
 		</div>
 		<div id="_msgFiltersContainer" style="margin-left: auto;">
-			<label><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
-			<label><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
+			<label id="_msgsFilter2WayContainer"><input id="_msgsFilter2Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉👈</label>
+			<label id="_msgsFilter1WayContainer"><input id="_msgsFilter1Way" type="checkbox" onchange="changeMessage(this)" class="chkbx2" />👉</label>
 		</div>
 		
 	</div>
@@ -119,7 +119,7 @@
 <div id="_eventsSectionContainer" style="
 	border: 1px solid teal;
 ">
-	<div style="
+	<div id="_evtsBanner" style="
 		background: #e5e2a6;
 		border-bottom: 1px solid black;
 		text-align: center;

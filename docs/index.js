@@ -757,65 +757,79 @@ icons.unlock = ''+
 </svg>`;
 
 _cred.title = `Input your credentials here.`;
-_credForget.title = `Forget remembered credentials.`;
+_credForget.title = `Forget remembered credentials.
+📋Effective at next page refresh.`;
 
 _conn.title = `Connect to the server.`;
 _connAutoContainer.title = `Automatically connect to server.
-
-Note:
-  Effective at next page refresh.
+📋Effective at next page refresh.
 `;
+_connKeepContainer.title = `Keep connection open by sending heartbeat messages.`;
+_connKeepFlashTarget1.title = `Indicates when client is sending heartbeat to server.`;
+_connKeepFlashTarget2.title = `Indicates when server is sending heartbeat to client.`;
 
 _appAuth.title = `Authenticate the application.
-
-Requires:
-  You have already provided your credentials.
-  You are already connected to the server.`;
+📋Requires:
+1.✔Credentials have been provided.
+2.✔Being connected to server.`;
 _appAuthAutoContainer.title = `Automatically authenticate the application.
-
-Note:
-  Effective at next page refresh.
+📋Effective at next page refresh.
 `;
 
 _acc.title = `Account used for "ctidTraderAccount" field of a message.
-(if message has such field)`;
-_accLoad.title = 'Load all accounts.';
+📋If message has such field.`;
+_accLoad.title = `Load all accounts.
+📋Requires:
+1 ✔Credentials have been provided.
+2 ✔Being connected to server.
+3 ✔Application has been authenticated.`;
+
 _accLockContainer.title = `Lock to currently selected account.
-
-Note:
-  Disables account loading.
-  Effective at next page refresh.`;
+📋Disables account loading.
+📋Effective at next page refresh.`;
 _accLoadAutoContainer.title = `Automatic account loading.
+📋Eeffective at next page refresh.`;
 
-Note:
-  Eeffective at next page refresh.`;
-_accAuth.title = `Authenticate the selected account.`;
+_accAuth.title = `Authenticate the selected account.
+📋Requires:
+1 ✔Credentials have been provided.
+2 ✔Being connected to server.
+3 ✔Application has been authenticated.
+4 ✔An account is selected. (through either account loading or locking)`;
 _accAuthAutoContainer.title = `Automatic account auth.
-
-Note:
-  Effective at next page refresh.`;
+📋Effective at next page refresh.`;
 
 _sym.title = `Symbol used for "symbolId" field of a message.
-(if message has such field)`;
-_symLoad.title = `Load all symbols.`;
+📋If message has such field.`;
+_symLoad.title = `Load all symbols.
+📋Requires:
+1 ✔Credentials have been provided.
+2 ✔Being connected to server.
+3 ✔Application has been authenticated.
+4 ✔An account have been authenticated.
+5 ✔A symbol is selected. (through either symbol loading or locking)`;
 _symLockContainer.title = `Lock to currently selected symbol.
-
-Note:
-  Disables symbol loading.
-  Effective at next page refresh.`;
+📋Disables symbol loading.
+📋Effective at next page refresh.`;
 _symLoadAutoContainer.title = `Automatic symbol loading.
-
-Note: 
-  Effective at next page refresh.`
+📋Effective at next page refresh.`
 
 _tsSectionLabel.title = `Timestamps used for "fromTimestamp" and "toTimestamp" fields of a message.
-(if message has such fields)`;
+📋If message has such fields.`;
 _tsFromContainer.title = `Timestamp for "fromTimestamp" field,
-
-Note:
-  Specified in a relative manner. (0 means now)`;
+📋Specified in a relative manner. (0 means now)`;
 _tsToContainer.title = `Timestamp for "toTimestamp" field,
-
-Note:
-  Specified in a relative manner. (0 means now)`;
+📋Specified in a relative manner. (0 means now)`;
 _tsLockContainer.title = `Lock distance between "from" and "to" values.`;
+
+_msgs.title = `The ProtoOA message to send to the server.
+📋Upon selecting, fields of the message are shown below.`;
+_send.title = `Send selected message with its fields.
+📋Empty fields are not added to the "payload".`;
+_msgsFilter2WayContainer.title = `Show 2-way messages only.
+📋Messages where there's a corresponding Res for the Req.`;
+_msgsFilter1WayContainer.title = `Show 1-way messages only.
+📋Messages where there's only a Req.`;
+
+_evtsBanner.title = `Indicates event-like messages from the server.
+📋Server response is only shown if an item is checked.`;
