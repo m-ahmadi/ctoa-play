@@ -668,7 +668,8 @@ function setupMsg(selected, r='', recurring) {
 				if (fieldkey === 'toTimestamp') inpval = getRelativeTimestamp(+_tsToVal.value, _tsToUnit.selectedOptions[0].value);
 				r += `<div><input id="${fieldkey}" type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
-			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${type.slice(7)}</div>`;
+			const typeFmt = type.startsWith('ProtoOA') ? type.slice(7) : type;
+			r += `<div title="${isFieldEnum ? fieldEnumFmt : ''}" class="${typcolrs[type]||'ccust'}">${typeFmt}</div>`;
 			r += `<div class="${ncccolrs[required]}">${required?'required':'optional'}</div>`;
 			r += '\n';
 		}
