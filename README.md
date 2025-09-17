@@ -71,8 +71,10 @@ This project was developed as a complement to the
 ## 💡 Why This Project?
 
 The cTrader OpenAPI is great and powerful but can be cumbersome at times,
-especially for quick tests or experiments. This includes opening and maintaining
-the connection, multi-step authentication processes, and exchanging messages.
+especially for quick tests or experiments. This is mostly due to the nature of
+socket communication and has nothing to do with the API itself. For example, all
+the extra work related to opening and maintaining the connection, multi-step
+authentication processes and exchanging messages.
 
 This playground simplifies the process by providing a UI for the repetitive
 steps and options for automation, allowing the user to focus on building request
