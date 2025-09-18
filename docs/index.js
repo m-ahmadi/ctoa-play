@@ -538,15 +538,17 @@ function establishConnection() {
 		if (payloadType === 51) {
 			flashElem(_connKeepFlashTarget2, 'red', 1, 2);
 			const t = Date.now();
-			heartbeatCountdownIntervalId = setInterval(() =>
-				_hbtimer.innerHTML = `(⏳${Math.round((Date.now()-t) / 1000)})`
-			, 1000);
-			if (_connKeep.checked) {
+			const sendHeartbeat = () => {
 				ws.sendj({payloadType: 51});
 				setTimeout(()=>flashElem(_connKeepFlashTarget1, 'red', 1.5, 3), 1000);
 				clearInterval(heartbeatCountdownIntervalId);
 				_hbtimer.innerText = '';
-			}
+			};
+			heartbeatCountdownIntervalId = setInterval(() => {
+				_hbtimer.innerHTML = `(⏳${Math.round((Date.now()-t) / 1000)})`;
+				if (_connKeep.checked) sendHeartbeat();
+			}, 1000);
+			if (_connKeep.checked) sendHeartbeat();
 			return;
 		}
 		
