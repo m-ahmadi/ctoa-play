@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		conf.filterMessages1Way = true;
 	}
 	
+	if (conf.connectionHost) _connHost.value = conf.connectionHost;
 	_connAuto.checked = conf.autoConnect;
 	_connKeep.checked = conf.keepConnection;
 	_appAuthAuto.checked = conf.autoAppAuth;
@@ -154,6 +155,7 @@ function forgetCredentials() {
 
 function updateAutoState(el) {
 	const {id} = el;
+	if (id === '_connHost') conf.connectionHost = el.value;
 	if (id === '_connAuto') conf.autoConnect = !!el.checked;
 	if (id === '_connKeep') conf.keepConnection = !!el.checked;
 	if (id === '_appAuthAuto') conf.autoAppAuth = !!el.checked;
@@ -507,7 +509,7 @@ function authApplication() {
 }
 
 function establishConnection() {
-	ws = new WebSocket('wss://live.ctraderapi.com:5036');
+	ws = new WebSocket(`wss://${_connHost.value}.ctraderapi.com:5036`);
 	ws.__proto__.sendj = function (o) {this.send(JSON.stringify(o));}
 	_conn.style.border = '';
 	_conn.disabled = true;

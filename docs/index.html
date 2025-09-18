@@ -20,7 +20,7 @@
 			<button id="_cred" onclick="changeCredentials()">Credentials</button><button id="_credForget" onclick="forgetCredentials()" class="tinybtn">Forget</button>
 		</div>
 		<div style="flex: 1 1 auto">
-			<button id="_conn" onclick="establishConnection()">Connect</button><label id="_connAutoContainer"><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
+			<select id="_connHost" style="font-size:x-small;" onchange="updateAutoState(this)"><option value="live">Live</option><option value="demo" >Demo</option></select><button id="_conn" onclick="establishConnection()">Connect</button><label id="_connAutoContainer"><input id="_connAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
 		</div>
 		<div style="flex: 1 1 auto">
 			<button id="_appAuth" onclick="authApplication()">Auth App</button><label id="_appAuthAutoContainer"><input id="_appAuthAuto" type="checkbox" onchange="updateAutoState(this)" class="chkbx2" />auto</label>
