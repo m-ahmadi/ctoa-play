@@ -65,8 +65,8 @@ This project was developed as a complement to the
 9. **View Responses.**
    - Server responses are displayed in the response panel.
 10. **Control Event-Like Responses.**
-    - Check/uncheck items in **`🔔 Events`** to allow/disallow their responses to be
-      shown.
+    - Check/uncheck items in **`🔔 Events`** to allow/disallow their responses
+      to be shown.
 
 ## 💡 Why This Project?
 
