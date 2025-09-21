@@ -42,7 +42,7 @@
 	<div class="optg" style="display: flex;">
 		<span style="flex: 1 1 auto;">Account: </span>
 		<div style="flex: 1 1 auto;" >
-			<select id="_acc" onchange="changeAccount(+this.selectedOptions[0].value)"></select>
+			<select id="_acc" onchange="changeAccount(+this.value)"></select>
 			<span id="_accLockContainer">
 				<input id="_accLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_accLockIcon" for="_accLock">
 					<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
@@ -62,7 +62,7 @@
 	<div class="optg" style="display: flex;">
 		<span style="flex: 1 1 auto;" >Symbol:</span>
 		<div style="flex: 1 1 auto;" >
-			<select id="_sym" onchange="changeSymbol(+this.selectedOptions[0].value)"></select>
+			<select id="_sym" onchange="changeSymbol(+this.value)"></select>
 			<span id="_symLockContainer">
 				<input id="_symLock" type="checkbox" class="chkbx3" onchange="updateAutoState(this);" disabled /><label id="_symLockIcon" for="_symLock">
 					<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:sub;">
@@ -104,7 +104,7 @@
 	<div class="optg" style="background:khaki; display:flex;" >
 		<b style="flex: 1 1 auto;">Message:</b>
 		<div style="flex: 1 1 auto;">
-			<select id="_msgs" onchange="setupMsg(this.selectedOptions[0].value)"></select>
+			<select id="_msgs" onchange="setupMsg(this.value)"></select>
 			<button id="_send" onclick="sendMessage()">Send</button>
 		</div>
 		<div id="_msgFiltersContainer" style="margin-left: auto;">

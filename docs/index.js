@@ -254,10 +254,10 @@ function changeTimestamps(el) {
 	
 	if (_msg.hasChildNodes()) {
 		const _targ1 = _msg.querySelector('input[name="fromTimestamp"]');
-		if (_targ1) _targ1.value = getRelativeTimestamp(frm, _tsFromUnit.selectedOptions[0].value);
+		if (_targ1) _targ1.value = getRelativeTimestamp(frm, _tsFromUnit.value);
 		
 		const _targ2 = _msg.querySelector('input[name="toTimestamp"]');
-		if (_targ2) _targ2.value = getRelativeTimestamp(to, _tsToUnit.selectedOptions[0].value);
+		if (_targ2) _targ2.value = getRelativeTimestamp(to, _tsToUnit.value);
 	}
 }
 
@@ -316,7 +316,7 @@ function loadSymbols() {
 	};
 	const req = {clientMsgId, payloadType: 2114, payload: {
 		accessToken,
-		ctidTraderAccountId: +_acc.selectedOptions[0].value,
+		ctidTraderAccountId: +_acc.value,
 	}};
 	ws.sendj(req);
 }
@@ -384,7 +384,7 @@ function authAccount() {
 	};
 	const req = {clientMsgId, payloadType: 2102, payload: {
 		accessToken,
-		ctidTraderAccountId: +_acc.selectedOptions[0].value,
+		ctidTraderAccountId: +_acc.value,
 	}};
 	ws.sendj(req);
 }
@@ -615,7 +615,7 @@ function sendMessage() {
 	var fields = fieldNames.map((v,i) => [v, formElems[i], ptypes[i]]);
 	
 	const payload = constructPayload(fields);
-	const payloadType = pb[_msgs.selectedOptions[0].value].fields.payloadType.defaultValue;
+	const payloadType = pb[_msgs.value].fields.payloadType.defaultValue;
 	const msg = {payloadType, payload};
 	
 	ws.sendj(msg);
@@ -666,10 +666,10 @@ function setupMsg(selected, r='', recurring) {
 				if (type.startsWith('int') || type === 'double') inptyp = 'number';
 				let inpval =  '';
 				if (creds && Object.keys(creds).includes(fieldkey)) {inpval = creds[fieldkey]; inptyp = 'password';}
-				if (fieldkey === 'ctidTraderAccountId' && _acc.options.length) inpval = +_acc.selectedOptions[0].value;
-				if (fieldkey === 'symbolId' && _sym.options.length) inpval = +_sym.selectedOptions[0].value;
-				if (fieldkey === 'fromTimestamp') inpval = getRelativeTimestamp(+_tsFromVal.value, _tsFromUnit.selectedOptions[0].value);
-				if (fieldkey === 'toTimestamp') inpval = getRelativeTimestamp(+_tsToVal.value, _tsToUnit.selectedOptions[0].value);
+				if (fieldkey === 'ctidTraderAccountId' && _acc.options.length) inpval = +_acc.value;
+				if (fieldkey === 'symbolId' && _sym.options.length) inpval = +_sym.value;
+				if (fieldkey === 'fromTimestamp') inpval = getRelativeTimestamp(+_tsFromVal.value, _tsFromUnit.value);
+				if (fieldkey === 'toTimestamp') inpval = getRelativeTimestamp(+_tsToVal.value, _tsToUnit.value);
 				r += `<div><input id="${fieldkey}" type="${inptyp}" name="${fieldkey}" ${required?'required':''} value="${inpval}" /></div>`;
 			}
 			const typeFmt = type.startsWith('ProtoOA') ? type.slice(7) : type;
