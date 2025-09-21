@@ -514,6 +514,7 @@ function establishConnection() {
 	_conn.style.border = '';
 	_conn.disabled = true;
 	_conn.innerText = 'Connect (...)';
+	_connHost.disabled = true;
 	_res.value = '';
 	_res.style.color = '';
 	
@@ -521,6 +522,7 @@ function establishConnection() {
 		_conn.innerText = 'Connect (✅)';
 		_accAuth.innerText = 'Auth';
 		_accAuth.disabled = false;
+		_connHost.disabled = true;
 		if (_appAuthAuto.checked) authApplication();
 	};
 
@@ -563,6 +565,7 @@ function establishConnection() {
 	ws.onclose = function () {
 		_conn.innerText = 'Connect (❌)';
 		_conn.disabled = false;
+		_connHost.disabled = false;
 		clearInterval(heartbeatCountdownIntervalId);
 		_hbtimer.innerText = '';
 	};
@@ -581,14 +584,15 @@ function constructPayload(fields, r={}, recurring) {
 		} else {
 			const {type} = formElem;
 			let val;
-			if (['text','password','number'].includes(type) && formElem.value) {
+			if (['text','password','number','select-one'].includes(type) && formElem.value) {
 				val = formElem.value;
-				if (type === 'number') val = +val;
+				if (type === 'number' || type === 'select-one') val = +val;
 			} else {
-				if (type === 'checkbox') {
-					val = formElem.checked;
-				} else if (type === 'select-one') {
-					val = +formElem.selectedOptions[0].value;
+				if (type === 'checkbox' && formElem.checked) {
+					val = true;
+					// not include field if checkbox unchecked
+					// this is fine as long as there are no required bool field in the api
+					// otherwise we would need tri-state checkbox
 				}
 			}
 			if (val !== undefined) r[formElem.name] = val;
@@ -656,7 +660,8 @@ function setupMsg(selected, r='', recurring) {
 			r += `<div data-field><label for="${fieldkey}">${fieldkey}:</label></div>`;
 			if (isFieldEnum) {
 				r += `<div><select id="${fieldkey}" name="${fieldkey}">`;
-				r += fieldEnum.map(([v,k])=>`<option value="${v}">${k}</option>`).join('\n');
+				r += `<option>—None—</option>`;
+				r += fieldEnum.map(([v,k],i)=>`<option value="${v}"${required && i===0?' selected':''}>${k}</option>`).join('\n');
 				r += `</select></div>`;
 			} else if (isFieldDeep) {
 				r += `<div>▼—————deep—————▼</div>`;
