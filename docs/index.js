@@ -4,7 +4,7 @@ let creds;
 let accessToken;
 let ws;
 let wsOnMsgHooks = {};
-let eventPayloadTypes;
+let eventElems, eventPayloadTypes;
 let heartbeatCountdownIntervalId;
 let tsLockDiff = 0;
 const uid = (i => () => 'cm_id_' + i++)(1);
