@@ -28,14 +28,21 @@ const pb = protobuf.Root.fromJSON(window.pbCompiledSrc).nested;
 window.pbCompiledSrc = undefined;
 const {evts,reqs2,reqs1} = categorizeMessages(Object.keys(pb));
 
-_evts.innerHTML = evts.map(i=>i.slice(0,-5)).map(i => ''+
-`<div class="flasher">
+_evts.innerHTML = evts.map(i => {
+	const name = i.slice(0, -5);
+	const payloadType = pb['ProtoOA'+i].fields.payloadType.defaultValue;
+	const s = ''+
+`<div class="flasher" title="payloadType: ${payloadType}">
 	<label style="display:block">
-		<input type="checkbox" name="${i}" class="flasher-input" />${i}</label>
-</div>`).join('\n');
+		<input type="checkbox" name="${name}" class="flasher-input" />${name}
+		<span class="badge"></span>
+	</label>
+</div>`;
+	return s;
+}).join('\n');
 
 eventElems = Object.fromEntries([..._evts.querySelectorAll('.flasher')].map(el => [
-	pb['ProtoOA'+el.innerText+'Event'].fields.payloadType.defaultValue, el
+	pb['ProtoOA'+el.querySelector('input').name+'Event'].fields.payloadType.defaultValue, el
 ]));
 eventPayloadTypes = new Set(Object.keys(eventElems).map(parseFloat));
 
@@ -266,6 +273,14 @@ function getRelativeTimestamp(value, unit) {
 	const m = ({sec:'Seconds',min:'Minutes',day:'Date'})[unit];
 	d['set'+m](d['get'+m]() - value);
 	return +d;
+}
+
+function clearBadges() {
+	_clearBadges.disabled = true;
+	for (const el of document.querySelectorAll('.badge')) {
+		el.innerText = '';
+		el.style.padding = '';
+	}
 }
 
 function loadSymbols() {
@@ -523,6 +538,7 @@ function establishConnection() {
 		_accAuth.innerText = 'Auth';
 		_accAuth.disabled = false;
 		_connHost.disabled = true;
+		clearBadges();
 		if (_appAuthAuto.checked) authApplication();
 	};
 
@@ -533,6 +549,10 @@ function establishConnection() {
 		if (eventPayloadTypes.has(payloadType)) {
 			const el = eventElems[payloadType];
 			flashElem(el, 'khaki', 0.1, 0.1);
+			const badge = el.querySelector('.badge');
+			badge.innerText = (+badge.innerText) + 1;
+			badge.style.padding = '0 3px';
+			_clearBadges.disabled = false;
 			
 			if (!el.querySelector('input').checked) {
 				return;

@@ -60,6 +60,13 @@ body {
 	accent-color: #e5e2a6;
 }
 
+.badge {
+	background: saddlebrown;
+	color: lightyellow;
+	border-radius: 10px;
+	font-size: x-small;
+}
+
 .boxy1 {
 	width: 22%;
 	height: 18px;
@@ -108,10 +115,19 @@ html,body {height: 100%}
 	#_optsSectionContainer { width: 81%;}
 	#_eventsSectionContainer { width: 17%; }
 }
-@media screen and (min-width: 1180px) {
-	#_optsSectionContainer { width: 77%;}
-	#_eventsSectionContainer { width: 21%; }
+@media screen and (min-width: 1340px) {
+	#_optsSectionContainer { width: 74%;}
+	#_eventsSectionContainer { width: 24%; }
 }
+@media screen and (max-width: 1340px) {
+	#_optsSectionContainer { width: 70%;}
+	#_eventsSectionContainer { width: 28%; }
+}
+@media screen and (max-width: 635px) {
+	#_optsSectionContainer { width: 66%;}
+	#_eventsSectionContainer { width: 32%; }
+}
+
 
 @media screen and (max-width: 1185px) {
 	#_controlSection { width: 56%;}
@@ -130,10 +146,6 @@ html,body {height: 100%}
 	#_resSectionContainer { width: 25%; }
 }
 
-@media screen and (max-width: 570px) {
-	#_optsSectionContainer { width: 70%;}
-	#_eventsSectionContainer { width: 28%; }
-}
 
 @media screen and (max-width: 850px) {
 	#_controlSection {
