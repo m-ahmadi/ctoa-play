@@ -382,6 +382,18 @@ function authAccount() {
 			const {errorCode, description} = res.payload;
 			if (errorCode === 'ALREADY_LOGGED_IN') {
 				_accAuth.innerText = 'Auth (✅)';
+			} else if (errorCode === 'CANT_ROUTE_REQUEST') {
+				ws.close(1000);
+				_accAuth.innerText = 'Auth (❌)';
+				_accAuth.disabled = false;
+				let msg = `<b>${errorCode}</b>: ${description}<br><br>`;
+				msg += "This happens when trying to authenticate a demo<br>";
+				msg += "account while being connected to the live<br>";
+				msg += "endpoint or vice verca.<br><br>";
+				msg += "First, connect to the proper endpoint.";
+				_dialogMsg.style.color = 'red';
+				_dialogMsg.innerHTML = msg;
+				_dialog.showModal();
 			} else {
 				_accAuth.innerText = 'Auth (❌)';
 				_dialogMsg.style.color = 'red';
@@ -790,6 +802,8 @@ _cred.title = `Input your credentials here.`;
 _credForget.title = `Forget remembered credentials.
 📋Effective at next page refresh.`;
 
+_connHost.title = `Select which endpoint to connect to.
+📋An account can authenticate only if connection made to matching endpoint.`;
 _conn.title = `Connect to the server.`;
 _connAutoContainer.title = `Automatically connect to server.
 📋Effective at next page refresh.
