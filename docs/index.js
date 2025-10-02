@@ -243,19 +243,22 @@ function changeMessage(el) {
 
 function changeTimestamps(el) {
 	let [frm, to] = [_tsFromVal, _tsToVal].map(i => +i.value);
-	if (to > frm) {
+	
+	if (_tsLock.checked) {
+		if (el.id === '_tsFromVal') {
+			to = frm - tsLockDiff;
+			_tsToVal.value = to;
+		} else if (el.id === '_tsToVal') {
+			frm = to + tsLockDiff;
+			_tsFromVal.value = frm;
+		}
+	}
+	
+	if (to >= frm) {
 		if (el.id === '_tsFromVal') {
 			_tsToVal.value = --frm;
 		} else if (el.id === '_tsToVal') {
 			_tsFromVal.value = ++to;
-		}
-	}
-	
-	if (_tsLock.checked) {
-		if (el.id === '_tsFromVal') {
-			_tsToVal.value = frm - tsLockDiff;
-		} else if (el.id === '_tsToVal') {
-			_tsFromVal.value = tsLockDiff + to;
 		}
 	}
 	
