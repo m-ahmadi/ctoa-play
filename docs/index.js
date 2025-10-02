@@ -665,8 +665,8 @@ function setupMsg(selected, r='', recurring) {
 	
 	const msg = pb[selected];
 	
-	let [int32,int64,double,bool,string] = ['cint','cint','cdbl','cbool','cstr'];
-	const typcolrs = {int32,int64,double,bool,string};
+	let [int32,int64,uint32,uint64,double,bool,string] = ['cint','cint','cuint','cuint','cdbl','cbool','cstr'];
+	const typcolrs = {int32,int64,uint32,uint64,double,bool,string};
 	const ncccolrs = {'true':'reqrd','false':'optnl'};
 	
 	for (const fieldkey of Object.keys(msg.fields)) {
@@ -700,7 +700,7 @@ function setupMsg(selected, r='', recurring) {
 			} else {
 				let inptyp = 'text';
 				if (type === 'bool') inptyp = 'checkbox';
-				if (type.startsWith('int') || type === 'double') inptyp = 'number';
+				if (type.startsWith('int') || type.startsWith('uint') || type === 'double') inptyp = 'number';
 				let inpval =  '';
 				if (creds && Object.keys(creds).includes(fieldkey)) {inpval = creds[fieldkey]; inptyp = 'password';}
 				if (fieldkey === 'ctidTraderAccountId' && _acc.options.length) inpval = +_acc.value;
