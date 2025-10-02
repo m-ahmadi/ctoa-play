@@ -665,7 +665,7 @@ function setupMsg(selected, r='', recurring) {
 	
 	const msg = pb[selected];
 	
-	let [int32,int64,uint32,uint64,double,bool,string] = ['cint','cint','cuint','cuint','cdbl','cbool','cstr'];
+	const [int32,int64,uint32,uint64,double,bool,string] = ['cint','cint','cuint','cuint','cdbl','cbool','cstr'];
 	const typcolrs = {int32,int64,uint32,uint64,double,bool,string};
 	const ncccolrs = {'true':'reqrd','false':'optnl'};
 	
