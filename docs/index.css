@@ -33,8 +33,8 @@ body {
 }
 
 .cint {color: blue;}
-.cuint {color: blue;}
-.cdbl {color: blue;}
+.cuint {color: rgb(0, 0, 161);}
+.cdbl {color: rgb(60, 60, 255);}
 .cbool {color: magenta;}
 .cstr {color: peru;}
 .ccust {color: black;}
