@@ -540,7 +540,7 @@ function authApplication() {
 
 function establishConnection() {
 	ws = new WebSocket(`wss://${_connHost.value}.ctraderapi.com:5036`);
-	ws.__proto__.sendj = function (o) {this.send(JSON.stringify(o));}
+	ws.__proto__.sendj = function (o) {this.send(JSON.stringify(o));};
 	_conn.style.border = '';
 	_conn.disabled = true;
 	_conn.innerText = 'Connect (...)';
