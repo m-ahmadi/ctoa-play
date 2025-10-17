@@ -56,15 +56,15 @@ This project was developed as a complement to the
    - You can also check **`☑auto`** to make it automatic on future visits.
    - You can also choose to lock `🔒` to one symbol, so no need for loading all
      symbols on future visits.
-8. **Send Message.**
+8. **Send message.**
    - Choose a message type, fill out the required/optional fields, and click
      **`Send`**.
    - You can filter messages shown in the list by two options:
      - **`👉👈`** Two-Way Messages
      - **`👉`** One-Way Messages
-9. **View Responses.**
+9. **View responses.**
    - Server responses are displayed in the response panel.
-10. **Control Event-Like Responses.**
+10. **Control event-like responses.**
     - Check/uncheck items in **`🔔 Events`** to allow/disallow their responses
       to be shown.
 
