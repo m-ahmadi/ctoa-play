@@ -547,6 +547,20 @@ function establishConnection() {
 	_connHost.disabled = true;
 	_res.value = '';
 	_res.style.color = '';
+	_dialogMsg.innerHTML = '';
+	_dialogMsg.style.color = '';
+	
+	ws.onerror = function () {
+		let msg = "❌ Could not open WebSocket connection to the server.<br><br>";
+		msg += "Possible reasons:<br>";
+		msg += "&emsp; Internet connection.<br>";
+		msg += "&emsp; Proxy/VPN related issue.<br>";
+		msg += "&emsp; Firewall or network blocking.<br>";
+		msg += "&emsp; Browser related problem.<br>";
+		_dialogMsg.style.color = 'red';
+		_dialogMsg.innerHTML = msg;
+		_dialog.showModal();
+	};
 	
 	ws.onopen = function () {
 		_conn.innerText = 'Connect (✅)';
