@@ -13,6 +13,17 @@ const sortAlphabet = (a, b) => a.localeCompare(b);
 if (!conf.creds) {
 	_cred.innerText = 'Credentials (❌)';
 	_credForget.disabled = true;
+	_dialogMsg.style.color = '';
+	let msg = '<b>Disclaimer:</b><br><br>';
+	msg += 'This software is not an official cTrader product.<br>'
+	msg += 'Please be aware that you use it at your own discretion,<br>';
+	msg += 'and we strongly recommend using it on demo accounts only.<br><br>';
+	msg += 'Make sure to read this <a target="_blank" href="'
+	msg += 'https://github.com/m-ahmadi/ctoa-play?tab=readme-ov-file#️-security-concerns';
+	msg += '">"Security Concerns"</a> section fully<br>';
+	msg += 'before using this software.';
+	_dialogMsg.innerHTML = msg;
+	_dialog.showModal();
 } else {
 	creds = conf.creds;
 	({accessToken} = creds);
