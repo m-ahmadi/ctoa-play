@@ -692,6 +692,7 @@ function setupMsg(selected, r='', recurring) {
 	// isFieldDeep = field type in pb has fields itself
 	
 	const msg = pb[selected];
+	const docUrl = 'https://help.ctrader.com/open-api/messages/#'+msg.name.toLowerCase();
 	
 	const [int32,int64,uint32,uint64,double,bool,string] = ['cint','cint','cuint','cuint','cdbl','cbool','cstr'];
 	const typcolrs = {int32,int64,uint32,uint64,double,bool,string};
@@ -712,7 +713,7 @@ function setupMsg(selected, r='', recurring) {
 		}
 		if (fieldkey === 'payloadType') {
 			r += `<div><u>${fieldkey}</u>:</div>`;
-			r += `<div><code class="cuscode">${field.defaultValue}</code></div>`;
+			r += `<div><code class="cuscode"><a href="${docUrl}" target="_blank">${field.defaultValue}</a></code></div>`;
 			r += `<div></div>`;
 			r += `<div></div>`;
 			r += `\n`;
